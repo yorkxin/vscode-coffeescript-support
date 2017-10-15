@@ -21,5 +21,8 @@
 		"@types/mocha": "^2.2.42",
 		"@types/node": "^6.0.88",
 		"typescript": "^2.5.2"
+	},
+	"dependencies": {
+		"coffeescript": "^2.0.1"
 	}
 }

@@ -4,11 +4,16 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import * as fs from 'fs'
+import * as URL from 'url'
+
 import {
-	IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments, TextDocument, 
-	Diagnostic, DiagnosticSeverity, InitializeResult, TextDocumentPositionParams, CompletionItem, 
-	CompletionItemKind
+	IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments, TextDocument,
+	Diagnostic, DiagnosticSeverity, InitializeResult, TextDocumentPositionParams, CompletionItem,
+	CompletionItemKind, SymbolInformation, SymbolKind, Range
 } from 'vscode-languageserver';
+
+import CoffeeScriptParser from "./parser.js"
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
 let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -21,14 +26,15 @@ let documents: TextDocuments = new TextDocuments();
 documents.listen(connection);
 
 // After the server has started the client sends an initilize request. The server receives
-// in the passed params the rootPath of the workspace plus the client capabilites. 
-let workspaceRoot: string;
-connection.onInitialize((params): InitializeResult => {
-	workspaceRoot = params.rootPath;
+// in the passed params the rootPath of the workspace plus the client capabilites.
+// let workspaceRoot: string;
+connection.onInitialize((_): InitializeResult => {
+	// workspaceRoot = params.rootPath;
 	return {
 		capabilities: {
 			// Tell the client that the server works in FULL text document sync mode
 			textDocumentSync: documents.syncKind,
+			documentSymbolProvider: true,
 			// Tell the client that the server support code complete
 			completionProvider: {
 				resolveProvider: true
@@ -97,7 +103,7 @@ connection.onDidChangeWatchedFiles((_change) => {
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-	// The pass parameter contains the position of the text document in 
+	// The pass parameter contains the position of the text document in
 	// which code complete got requested. For the example we ignore this
 	// info and always provide the same completion items.
 	return [
@@ -127,6 +133,65 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 	return item;
 });
 
+connection.onDocumentSymbol((documentSymbolParams) => {
+	let path = URL.parse(documentSymbolParams.textDocument.uri).path
+	let tree = CoffeeScriptParser.parse(fs.readFileSync(path, 'utf-8'))
+	let symbolInformation: SymbolInformation[] = []
+
+	tree.traverseChildren(true, (node) => {
+		switch (node.constructor.name) {
+			case "Class":
+				let name = String(node.variable.base.value)
+				let range = _createRange(node.locationData)
+				symbolInformation.push(SymbolInformation.create(name, SymbolKind.Class, range))
+				break;
+
+			case "Assign":
+				if (node.value) {
+					let name = String(node.variable.base.value)
+
+					if (node.value.constructor.name === 'Code') {
+						let kind: SymbolKind
+						if (node.variable.base.value === 'constructor') {
+							kind = SymbolKind.Constructor
+						} else {
+							kind = SymbolKind.Method
+						}
+						let params = node.value.params.map(param => param.name.value).join(', ')
+						let arrow = node.value.bound ? "=>" : "->"
+						name = `${name}(${params}) ${arrow}`
+						let range = _createRange(node.locationData)
+						symbolInformation.push(SymbolInformation.create(name, kind, range))
+					} else if (node.variable.base.constructor.name === 'ThisLiteral') {
+						let kind = SymbolKind.Property
+						node.variable.properties.forEach((access) => {
+							name = `@${access.name.value}`
+							let range = _createRange(access.locationData)
+							symbolInformation.push(SymbolInformation.create(name, kind, range))
+						})
+					} else if (node.variable.base.constructor.name === 'PropertyName') {
+						let kind = SymbolKind.Property
+						let range = _createRange(node.locationData)
+						symbolInformation.push(SymbolInformation.create(name, kind, range))
+					} else {
+						let kind = SymbolKind.Variable
+						let range = _createRange(node.locationData)
+						symbolInformation.push(SymbolInformation.create(name, kind, range))
+					}
+
+					if (name === "ho") {
+						console.log(node)
+					}
+				}
+				break;
+
+			default:
+				break;
+		}
+	})
+	return symbolInformation
+})
+
 /*
 connection.onDidOpenTextDocument((params) => {
 	// A text document got opened in VSCode.
@@ -149,3 +214,7 @@ connection.onDidCloseTextDocument((params) => {
 
 // Listen on the connection
 connection.listen();
+
+function _createRange(locationData: any): Range {
+	return Range.create(locationData.first_line, locationData.first_column, locationData.last_line, locationData.last_column)
+}

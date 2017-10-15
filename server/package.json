@@ -12,6 +12,7 @@
 		"url": "https://github.com/chitsaou/vscode-coffeescript"
 	},
 	"dependencies": {
+		"coffeescript": "^2.0.1",
 		"vscode-languageserver": "^3.4.2"
 	},
 	"scripts": {
