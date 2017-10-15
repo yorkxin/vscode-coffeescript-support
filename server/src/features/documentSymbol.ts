@@ -1,17 +1,16 @@
 import * as CoffeeScript from 'coffeescript'
 import * as Nodes from 'coffeescript/lib/coffeescript/nodes'
 
-import * as fs from 'fs'
-import * as URL from 'url'
+import { readFileByURI } from "../utils/fileReader"
 
 import { DocumentSymbolParams, SymbolInformation, SymbolKind, Range } from "vscode-languageserver"
 
 export default function documentSymbol(documentSymbolParams: DocumentSymbolParams): SymbolInformation[] {
-  let path = URL.parse(documentSymbolParams.textDocument.uri).path;
   let tree: Nodes.Base
+  let src = readFileByURI(documentSymbolParams.textDocument.uri)
 
   try {
-    tree = CoffeeScript.nodes(fs.readFileSync(path, 'utf-8'))
+    tree = CoffeeScript.nodes(src)
   } catch (error) {
     return []
   }

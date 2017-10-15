@@ -6,12 +6,13 @@
 /// <reference path="../@types/coffeescript/index.d.ts"/>
 
 import {
-	IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments, TextDocument,
-	Diagnostic, DiagnosticSeverity, InitializeResult, TextDocumentPositionParams, CompletionItem,
+	IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
+	InitializeResult, TextDocumentPositionParams, CompletionItem,
 	CompletionItemKind
 } from 'vscode-languageserver';
 
 import documentSymbol from "./features/documentSymbol"
+import validateTextDocument from "./features/validateTextDocument"
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
 let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -44,60 +45,38 @@ connection.onInitialize((_): InitializeResult => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
-	validateTextDocument(change.document);
+	validateTextDocument(change.document.uri);
 });
 
-// The settings interface describe the server relevant settings part
-interface Settings {
-	lspSample: ExampleSettings;
-}
+// // The settings interface describe the server relevant settings part
+// interface Settings {
+// 	lspSample: ExampleSettings;
+// }
 
-// These are the example settings we defined in the client's package.json
-// file
-interface ExampleSettings {
-	maxNumberOfProblems: number;
-}
+// // These are the example settings we defined in the client's package.json
+// // file
+// interface ExampleSettings {
+// 	maxNumberOfProblems: number;
+// }
 
-// hold the maxNumberOfProblems setting
-let maxNumberOfProblems: number;
 // The settings have changed. Is send on server activation
 // as well.
-connection.onDidChangeConfiguration((change) => {
-	let settings = <Settings>change.settings;
-	maxNumberOfProblems = settings.lspSample.maxNumberOfProblems || 100;
+connection.onDidChangeConfiguration((_) => {
+	// let settings = <Settings>change.settings;
+	// maxNumberOfProblems = settings.lspSample.maxNumberOfProblems || 100;
 	// Revalidate any open text documents
-	documents.all().forEach(validateTextDocument);
+	documents.all().forEach((document) => validateTextDocument(document.uri));
 });
-
-function validateTextDocument(textDocument: TextDocument): void {
-	let diagnostics: Diagnostic[] = [];
-	let lines = textDocument.getText().split(/\r?\n/g);
-	let problems = 0;
-	for (var i = 0; i < lines.length && problems < maxNumberOfProblems; i++) {
-		let line = lines[i];
-		let index = line.indexOf('typescript');
-		if (index >= 0) {
-			problems++;
-			diagnostics.push({
-				severity: DiagnosticSeverity.Warning,
-				range: {
-					start: { line: i, character: index },
-					end: { line: i, character: index + 10 }
-				},
-				message: `${line.substr(index, 10)} should be spelled TypeScript`,
-				source: 'ex'
-			});
-		}
-	}
-	// Send the computed diagnostics to VSCode.
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
-}
 
 connection.onDidChangeWatchedFiles((_change) => {
 	// Monitored files have change in VSCode
 	connection.console.log('We recevied an file change event');
 });
 
+connection.onDidChangeTextDocument((param) => {
+	let diagnostics = validateTextDocument(param.textDocument.uri)
+	connection.sendDiagnostics({ uri: param.textDocument.uri, diagnostics });
+})
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {

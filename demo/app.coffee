@@ -7,6 +7,7 @@ class App
     @id = "1234"
 
   doSomething: (a, b, c = 1) ->
+
     a + b + c
 
     @name = 3
@@ -27,7 +28,7 @@ class App
 
 LAR = 'hay'
 
-mos = () =>
+mos = () -> true
 
 class Apuri extends App
   constructor: () ->
