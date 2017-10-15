@@ -8,8 +8,16 @@ import { DocumentSymbolParams, SymbolInformation, SymbolKind, Range } from "vsco
 
 export default function documentSymbol(documentSymbolParams: DocumentSymbolParams): SymbolInformation[] {
   let path = URL.parse(documentSymbolParams.textDocument.uri).path;
-  let tree = CoffeeScript.nodes(fs.readFileSync(path, 'utf-8'))
+  let tree: Nodes.Base
+
+  try {
+    tree = CoffeeScript.nodes(fs.readFileSync(path, 'utf-8'))
+  } catch (error) {
+    return []
+  }
+
   let symbolInformation: SymbolInformation[] = [];
+
   tree.traverseChildren(true, (node) => {
     if (node instanceof Nodes.Class) {
       let name = String(node.variable.base.value);
