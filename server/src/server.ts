@@ -5,17 +5,13 @@
 'use strict';
 /// <reference path="../@types/coffeescript/index.d.ts"/>
 
-import * as fs from 'fs'
-import * as URL from 'url'
-import * as CoffeeNodes from 'coffeescript/lib/coffeescript/nodes'
-
 import {
 	IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments, TextDocument,
 	Diagnostic, DiagnosticSeverity, InitializeResult, TextDocumentPositionParams, CompletionItem,
-	CompletionItemKind, SymbolInformation, SymbolKind, Range
+	CompletionItemKind
 } from 'vscode-languageserver';
 
-import CoffeeScriptParser from "./parser.js"
+import documentSymbol from "./features/documentSymbol"
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
 let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -135,59 +131,7 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 	return item;
 });
 
-connection.onDocumentSymbol((documentSymbolParams) => {
-	let path = URL.parse(documentSymbolParams.textDocument.uri).path
-	let tree = CoffeeScriptParser.parse(fs.readFileSync(path, 'utf-8'))
-	let symbolInformation: SymbolInformation[] = []
-
-	tree.traverseChildren(true, (node) => {
-		if (node instanceof CoffeeNodes.Class) {
-			let name = String(node.variable.base.value)
-			let range = _createRange(node.locationData)
-			symbolInformation.push(SymbolInformation.create(name, SymbolKind.Class, range))
-		} else if (node instanceof CoffeeNodes.Assign) {
-			if (node.value) {
-				let name = String(node.variable.base.value)
-
-				if (node.value instanceof CoffeeNodes.Code) {
-					let kind: SymbolKind
-					if (node.variable.base.value === 'constructor') {
-						kind = SymbolKind.Constructor
-					} else {
-						kind = SymbolKind.Method
-					}
-					let params = (node.value.params || []).map(param => param.name.value).join(', ')
-					let arrow = node.value.bound ? "=>" : "->"
-					name = `${name}(${params}) ${arrow}`
-					let range = _createRange(node.locationData)
-					symbolInformation.push(SymbolInformation.create(name, kind, range))
-				} else if (node.variable.base instanceof CoffeeNodes.ThisLiteral) {
-					let kind = SymbolKind.Property
-					node.variable.properties.forEach((access) => {
-						name = `@${access.name.value}`
-						let range = _createRange(access.locationData)
-						symbolInformation.push(SymbolInformation.create(name, kind, range))
-					})
-				} else if (node.variable.base instanceof CoffeeNodes.PropertyName) {
-					let kind = SymbolKind.Property
-					let range = _createRange(node.locationData)
-					symbolInformation.push(SymbolInformation.create(name, kind, range))
-				} else {
-					let kind = SymbolKind.Variable
-					let range = _createRange(node.locationData)
-					symbolInformation.push(SymbolInformation.create(name, kind, range))
-				}
-
-				if (name === "ho") {
-					console.log(node.context)
-				}
-			}
-		}
-
-		return true
-	})
-	return symbolInformation
-})
+connection.onDocumentSymbol(documentSymbol)
 
 /*
 connection.onDidOpenTextDocument((params) => {
@@ -212,6 +156,3 @@ connection.onDidCloseTextDocument((params) => {
 // Listen on the connection
 connection.listen();
 
-function _createRange(locationData: any): Range {
-	return Range.create(locationData.first_line, locationData.first_column, locationData.last_line, locationData.last_column)
-}
