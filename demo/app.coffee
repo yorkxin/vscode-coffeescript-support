@@ -2,7 +2,7 @@ class App
   FOO: 'bar'
   BAR = 'baz'
 
-  constructor: () ->
+  constructor: (abc) ->
     @name = @hello = "Hello World"
     @id = "1234"
 
@@ -11,6 +11,9 @@ class App
 
     @name = 3
     @xxx = 1
+
+    @access = array[3]
+    @range = [1..2]
 
   yo:
     ho:
@@ -27,5 +30,7 @@ LAR = 'hay'
 mos = () =>
 
 class Apuri extends App
+  constructor: () ->
+    super(123)
 
 Apuri::sayhi = ->

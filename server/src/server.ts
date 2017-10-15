@@ -3,9 +3,11 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 'use strict';
+/// <reference path="../@types/coffeescript/index.d.ts"/>
 
 import * as fs from 'fs'
 import * as URL from 'url'
+import * as CoffeeNodes from 'coffeescript/lib/coffeescript/nodes'
 
 import {
 	IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments, TextDocument,
@@ -139,55 +141,50 @@ connection.onDocumentSymbol((documentSymbolParams) => {
 	let symbolInformation: SymbolInformation[] = []
 
 	tree.traverseChildren(true, (node) => {
-		switch (node.constructor.name) {
-			case "Class":
+		if (node instanceof CoffeeNodes.Class) {
+			let name = String(node.variable.base.value)
+			let range = _createRange(node.locationData)
+			symbolInformation.push(SymbolInformation.create(name, SymbolKind.Class, range))
+		} else if (node instanceof CoffeeNodes.Assign) {
+			if (node.value) {
 				let name = String(node.variable.base.value)
-				let range = _createRange(node.locationData)
-				symbolInformation.push(SymbolInformation.create(name, SymbolKind.Class, range))
-				break;
 
-			case "Assign":
-				if (node.value) {
-					let name = String(node.variable.base.value)
-
-					if (node.value.constructor.name === 'Code') {
-						let kind: SymbolKind
-						if (node.variable.base.value === 'constructor') {
-							kind = SymbolKind.Constructor
-						} else {
-							kind = SymbolKind.Method
-						}
-						let params = node.value.params.map(param => param.name.value).join(', ')
-						let arrow = node.value.bound ? "=>" : "->"
-						name = `${name}(${params}) ${arrow}`
-						let range = _createRange(node.locationData)
-						symbolInformation.push(SymbolInformation.create(name, kind, range))
-					} else if (node.variable.base.constructor.name === 'ThisLiteral') {
-						let kind = SymbolKind.Property
-						node.variable.properties.forEach((access) => {
-							name = `@${access.name.value}`
-							let range = _createRange(access.locationData)
-							symbolInformation.push(SymbolInformation.create(name, kind, range))
-						})
-					} else if (node.variable.base.constructor.name === 'PropertyName') {
-						let kind = SymbolKind.Property
-						let range = _createRange(node.locationData)
-						symbolInformation.push(SymbolInformation.create(name, kind, range))
+				if (node.value instanceof CoffeeNodes.Code) {
+					let kind: SymbolKind
+					if (node.variable.base.value === 'constructor') {
+						kind = SymbolKind.Constructor
 					} else {
-						let kind = SymbolKind.Variable
-						let range = _createRange(node.locationData)
+						kind = SymbolKind.Method
+					}
+					let params = (node.value.params || []).map(param => param.name.value).join(', ')
+					let arrow = node.value.bound ? "=>" : "->"
+					name = `${name}(${params}) ${arrow}`
+					let range = _createRange(node.locationData)
+					symbolInformation.push(SymbolInformation.create(name, kind, range))
+				} else if (node.variable.base instanceof CoffeeNodes.ThisLiteral) {
+					let kind = SymbolKind.Property
+					node.variable.properties.forEach((access) => {
+						name = `@${access.name.value}`
+						let range = _createRange(access.locationData)
 						symbolInformation.push(SymbolInformation.create(name, kind, range))
-					}
-
-					if (name === "ho") {
-						console.log(node)
-					}
+					})
+				} else if (node.variable.base instanceof CoffeeNodes.PropertyName) {
+					let kind = SymbolKind.Property
+					let range = _createRange(node.locationData)
+					symbolInformation.push(SymbolInformation.create(name, kind, range))
+				} else {
+					let kind = SymbolKind.Variable
+					let range = _createRange(node.locationData)
+					symbolInformation.push(SymbolInformation.create(name, kind, range))
 				}
-				break;
 
-			default:
-				break;
+				if (name === "ho") {
+					console.log(node.context)
+				}
+			}
 		}
+
+		return true
 	})
 	return symbolInformation
 })
