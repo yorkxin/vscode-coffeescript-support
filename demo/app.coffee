@@ -66,5 +66,7 @@ class Apuri extends App
 # static func
 Apuri::sayhi = ->
 
+class Afuri extends Apuri
+
 human = class
-  constructor(@name)
+  constructor: (@name) ->

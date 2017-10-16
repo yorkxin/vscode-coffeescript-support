@@ -17,6 +17,11 @@ export default function documentSymbol(documentSymbolParams: DocumentSymbolParam
 
   let symbolInformation: SymbolInformation[] = [];
 
+  // if (tree instanceof Nodes.Block) {
+  //   TODO: tree.expressions => Assign and Class
+  //   symbolInformation = symbolInformation.concat(getSymbolsFromBlock(tree, null))
+  // }
+
   tree.traverseChildren(true, (node) => {
     try {
       if (node instanceof Nodes.Class) {
@@ -29,6 +34,7 @@ export default function documentSymbol(documentSymbolParams: DocumentSymbolParam
       return true
     }
   });
+
   return symbolInformation;
 };
 
@@ -44,7 +50,16 @@ function getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
 
   symbolInformation.push(SymbolInformation.create(className, SymbolKind.Class, _createRange(classNode.locationData)))
 
-  classNode.body.eachChild(node => {
+  if (classNode.body instanceof Nodes.Block) {
+    symbolInformation = symbolInformation.concat(getSymbolsFromBlock(classNode.body, className))
+  }
+
+  return symbolInformation
+}
+
+function getSymbolsFromBlock(block: Nodes.Block, container?: string): SymbolInformation[] {
+  let symbolInformation: SymbolInformation[] = []
+  block.eachChild(node => {
     if (node instanceof Nodes.Value) {
       if (node.base instanceof Nodes.Obj) {
         node.base.properties.forEach(property => {
@@ -63,7 +78,7 @@ function getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
               name = `${name}(${_formatParamList(property.value.params)})`
             }
 
-            symbolInformation.push(SymbolInformation.create(name, symbolKind, _createRange(property.locationData), null, className))
+            symbolInformation.push(SymbolInformation.create(name, symbolKind, _createRange(property.locationData), null, container))
           }
         })
       }
