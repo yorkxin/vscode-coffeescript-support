@@ -1,20 +1,39 @@
+A = require('lib_a')
+{ b } = require('lib_b')
+
+GLOBAL_A = 'abc'
+GLOBAL_B = {
+  varA: 1
+  varB: 2
+  func: (abc) -> 42
+}
+
+globalFunc = () -> true
+
 class App
   FOO: 'bar'
   BAR = 'baz'
 
-  constructor: (abc) ->
-    @name = @hello = "Hello World"
+  constructor: (@iVar, options) ->
+    # defining instant vars
     @id = "1234"
+    @name = @hello = "Hello World"
+    @hash = {}
+    @hash['shouldNotAppear'] = {}
 
   doSomething: (a, b, c = 1) ->
 
-    a + b + c
+    # local
+    shouldNotAppear = a + b + c
 
-    @name = 3
-    @xxx = 1
+    # accessing instance var
+    @houldNotAppear = 3
 
     @access = array[3]
     @range = [1..2]
+
+  # static func
+  @doAnother: (a, b, c) ->
 
   yo:
     ho:
@@ -26,12 +45,10 @@ class App
     mo: (a, b) =>
       return a + b
 
-LAR = 'hay'
-
-mos = () -> true
 
 class Apuri extends App
   constructor: () ->
     super(123)
 
+# static func
 Apuri::sayhi = ->
