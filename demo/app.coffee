@@ -13,6 +13,8 @@ globalFunc = () -> true
 class App
   FOO: 'bar'
   BAR = 'baz'
+  a:
+    b: 3
 
   constructor: (@iVar, options) ->
     # defining instant vars
@@ -33,7 +35,7 @@ class App
     @range = [1..2]
 
   # static func
-  @doAnother: (a, b, c) ->
+  @doAnother: (a, b, c) -> true
 
   yo:
     ho:
