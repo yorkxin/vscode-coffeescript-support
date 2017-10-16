@@ -186,8 +186,8 @@ declare module "coffeescript/lib/coffeescript/nodes" {
   export class AwaitReturn extends Return {}
 
   export class Value extends Base {
-    base: IdentifierLiteral
-    properties: Access[]
+    base: Obj | Literal | PropertyName | Code
+    properties: Assign[] | Access[]
     isDefaultValue: boolean
 
     shouldCache(): boolean
@@ -271,7 +271,7 @@ declare module "coffeescript/lib/coffeescript/nodes" {
     generated: boolean
     lhs: boolean
     objects: PropertyName[]
-    properties: PropertyName[]
+    properties: Assign[]
     hasSplat(): boolean
   }
 
@@ -319,7 +319,7 @@ declare module "coffeescript/lib/coffeescript/nodes" {
 
   class Assign extends Base {
     variable: Value
-    value: Value
+    value: Value | Code
     context: string
     options: {
       param: string
@@ -344,7 +344,7 @@ declare module "coffeescript/lib/coffeescript/nodes" {
   }
 
   export class Param extends Base {
-    name: Literal
+    name: Literal | Value
     value?: Value
     splat?: Splat
   }

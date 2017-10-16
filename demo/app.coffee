@@ -13,6 +13,17 @@ globalFunc = () -> true
 class App
   FOO: 'bar'
   BAR = 'baz'
+  BAZ: [1, 2, 3]
+
+  num: 42
+  inf: Infinity
+  nan: NaN
+  str: 'string'
+  regex: /123+/
+  undef: undefined
+  nuru: null
+  bool: true
+
   a:
     b: 3
 
@@ -54,3 +65,6 @@ class Apuri extends App
 
 # static func
 Apuri::sayhi = ->
+
+human = class
+  constructor(@name)

@@ -20,71 +20,104 @@ export default function documentSymbol(documentSymbolParams: DocumentSymbolParam
   tree.traverseChildren(true, (node) => {
     try {
       if (node instanceof Nodes.Class) {
-        return getSymbolsFromClass(node)
-      }
-      else if (node instanceof Nodes.Assign) {
-        if (node.value) {
-          let name = String(node.variable.base.value);
-          if (node.value instanceof Nodes.Code) {
-            let kind: SymbolKind;
-            if (node.variable.base.value === 'constructor') {
-              kind = SymbolKind.Constructor;
-            }
-            else {
-              kind = SymbolKind.Method;
-            }
-            let params = (node.value.params || []).map(param => param.name.value).join(', ');
-            let arrow = node.value.bound ? "=>" : "->";
-            name = `${name}(${params}) ${arrow}`;
-            let range = _createRange(node.locationData);
-            symbolInformation.push(SymbolInformation.create(name, kind, range));
-          }
-          else if (node.variable.base instanceof Nodes.ThisLiteral) {
-            let kind = SymbolKind.Property;
-            node.variable.properties.forEach((access) => {
-              name = `@${access.name.value}`;
-              let range = _createRange(access.locationData);
-              symbolInformation.push(SymbolInformation.create(name, kind, range));
-            });
-          }
-          else if (node.variable.base instanceof Nodes.PropertyName) {
-            let kind = SymbolKind.Property;
-            let range = _createRange(node.locationData);
-            symbolInformation.push(SymbolInformation.create(name, kind, range));
-          }
-          else {
-            let kind = SymbolKind.Variable;
-            let range = _createRange(node.locationData);
-            symbolInformation.push(SymbolInformation.create(name, kind, range));
-          }
-          if (name === "ho") {
-            console.log(node.context);
-          }
-        }
+        symbolInformation = symbolInformation.concat(getSymbolsFromClass(node))
       }
       return true;
     } catch (error) {
-      console.log(node.locationData)
-      throw error
+      console.log("error in traverseChildren", node.locationData)
+    } finally {
+      return true
     }
   });
   return symbolInformation;
 };
 
-function getSymbolsFromClass(classNode: Nodes.Class) {
+function getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
   let symbolInformation: SymbolInformation[] = []
-  let className = String(classNode.variable.base.value)
+  let className: string
+
+  if (classNode.variable instanceof Nodes.Value && classNode.variable.base instanceof Nodes.Literal) {
+    className = classNode.variable.base.value
+  } else {
+    className = "(Anonymous Class)"
+  }
 
   symbolInformation.push(SymbolInformation.create(className, SymbolKind.Class, _createRange(classNode.locationData)))
 
-  classNode.body.traverseChildren(false, node => {
+  classNode.body.eachChild(node => {
     if (node instanceof Nodes.Value) {
+      if (node.base instanceof Nodes.Obj) {
+        node.base.properties.forEach(property => {
+          if (property.variable.base instanceof Nodes.Literal) {
+            let name: string
 
+            if (property.variable.base instanceof Nodes.ThisLiteral) {
+              name = _formatThisPropertyParam(property.variable)
+            } else if (property.variable.base instanceof Nodes.Literal) {
+              name = property.variable.base.value
+            }
+
+            let symbolKind = _determineSymbolKindByRHS(property.value)
+
+            if (property.value instanceof Nodes.Code) {
+              name = `${name}(${_formatParamList(property.value.params)})`
+            }
+
+            symbolInformation.push(SymbolInformation.create(name, symbolKind, _createRange(property.locationData), null, className))
+          }
+        })
+      }
     }
+
+    return true
   })
 
+  return symbolInformation
 }
 
 function _createRange(locationData: any): Range {
 	return Range.create(locationData.first_line, locationData.first_column, locationData.last_line, locationData.last_column)
+}
+
+function _formatParamList(params: Nodes.Param[]): string {
+  return params.map(_formatParam).join(', ')
+}
+
+function _formatParam(param: Nodes.Param): string {
+  // local variable
+  if (param.name instanceof Nodes.IdentifierLiteral) {
+    return param.name.value
+  }
+
+  // constructor(@foo)
+  if (param.name instanceof Nodes.Value) {
+    return _formatThisPropertyParam(param.name)
+  }
+
+  return "???"
+}
+
+/**
+ * Formats "@foo"
+ * @param {Nodes.Value} name
+ */
+function _formatThisPropertyParam(name: Nodes.Value) {
+  if (name.base instanceof Nodes.ThisLiteral) {
+    let firstProperty = name.properties[0]
+    if (firstProperty instanceof Nodes.Access) {
+      return `@${firstProperty.name.value}`
+    }
+  }
+
+  return "?"
+}
+
+function _determineSymbolKindByRHS(rhs: Nodes.Value | Nodes.Code): SymbolKind {
+  if (rhs instanceof Nodes.Value) {
+    return SymbolKind.Property
+  } else if (rhs instanceof Nodes.Code) {
+    return SymbolKind.Function
+  } else {
+    return SymbolKind.String
+  }
 }
