@@ -142,11 +142,17 @@ function _formatThisPropertyParam(name: Nodes.Value) {
   if (name.base instanceof Nodes.ThisLiteral) {
     let firstProperty = name.properties[0]
     if (firstProperty instanceof Nodes.Access) {
-      return `@${firstProperty.name.value}`
+      if (firstProperty.name.value === "prototype") {
+        // @::foo = ->
+        return "@"
+      } else {
+        // @foo = ->
+        return `@${firstProperty.name.value}`
+      }
     }
   }
 
-  return "?"
+  return ""
 }
 
 function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nodes.Code | Nodes.Call, container?: SymbolMetadata): SymbolMetadata {
@@ -161,6 +167,7 @@ function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nod
     name = "(unknown)"
   }
 
+  // TODO: merge this logic with _formatThisPropertyParam
   let possiblePrototypeAccess = lhs.properties[0]
   let possiblePrototypeName = lhs.properties[1]
 
@@ -169,6 +176,7 @@ function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nod
       name = `${name}::${possiblePrototypeName.name.value}`
     }
   }
+  // TODO: /above
 
   if (rhs instanceof Nodes.Code) {
     name = `${name}(${_formatParamList(rhs.params)})`;
