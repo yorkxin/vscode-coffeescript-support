@@ -11,16 +11,12 @@ interface ContainerInfo {
 }
 
 export default function documentSymbol(documentSymbolParams: DocumentSymbolParams): SymbolInformation[] {
-  let tree: Nodes.Block
-  let src = readFileByURI(documentSymbolParams.textDocument.uri)
-
   try {
-    tree = CoffeeScript.nodes(src)
+    let src = readFileByURI(documentSymbolParams.textDocument.uri)
+    return getSymbolsFromBlock(CoffeeScript.nodes(src))
   } catch (error) {
     return []
   }
-
-  return getSymbolsFromBlock(tree)
 };
 
 function getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
@@ -82,20 +78,22 @@ function getSymbolsFromObj(objNode: Nodes.Obj, container?: ContainerInfo): Symbo
 
 function getSymbolsFromAssign(assign: Nodes.Assign, container?: ContainerInfo): SymbolInformation[] {
   let symbolInformation: SymbolInformation[] = []
+  let lhs = assign.variable.base;
+  let rhs = assign.value
 
-  if (assign.variable.base instanceof Nodes.Literal) {
+  if (lhs instanceof Nodes.Literal) {
     let name: string;
 
-    if (assign.variable.base instanceof Nodes.ThisLiteral) {
+    if (lhs instanceof Nodes.ThisLiteral) {
       name = _formatThisPropertyParam(assign.variable);
-    } else if (assign.variable.base instanceof Nodes.Literal) {
-      name = assign.variable.base.value;
+    } else if (lhs instanceof Nodes.Literal) {
+      name = lhs.value;
     }
 
-    let symbolKind = _determineSymbolKindByRHS(assign.value);
+    let symbolKind = _determineSymbolKindByAssignment(lhs, rhs);
 
-    if (assign.value instanceof Nodes.Code) {
-      name = `${name}(${_formatParamList(assign.value.params)})`;
+    if (rhs instanceof Nodes.Code) {
+      name = `${name}(${_formatParamList(rhs.params)})`;
     }
 
     let containerName: string = null
@@ -105,7 +103,7 @@ function getSymbolsFromAssign(assign: Nodes.Assign, container?: ContainerInfo): 
 
     symbolInformation.push(SymbolInformation.create(name, symbolKind, _createRange(assign.locationData), null, containerName));
 
-    if (assign.value instanceof Nodes.Value && assign.value.base instanceof Nodes.Obj) {
+    if (rhs instanceof Nodes.Value && rhs.base instanceof Nodes.Obj) {
       let nextContainerName
 
       if (container) {
@@ -119,7 +117,7 @@ function getSymbolsFromAssign(assign: Nodes.Assign, container?: ContainerInfo): 
         kind: symbolKind
       }
 
-      symbolInformation = symbolInformation.concat(getSymbolsFromObj(assign.value.base, nextContainer));
+      symbolInformation = symbolInformation.concat(getSymbolsFromObj(rhs.base, nextContainer));
     }
   }
 
@@ -163,20 +161,15 @@ function _formatThisPropertyParam(name: Nodes.Value) {
   return "?"
 }
 
-function _determineSymbolKindByRHS(rhs: Nodes.Value | Nodes.Code, container?: ContainerInfo): SymbolKind {
+function _determineSymbolKindByAssignment(lhs: Nodes.Literal, rhs: Nodes.Value | Nodes.Code, container?: ContainerInfo): SymbolKind {
   if (rhs instanceof Nodes.Value) {
+    console.log(rhs)
     if (rhs.base instanceof Nodes.Obj) {
       return SymbolKind.Namespace
-    } else if (rhs.base instanceof Nodes.BooleanLiteral) {
-      return SymbolKind.Boolean
-    } else if (rhs.base instanceof Nodes.NumberLiteral) {
-      return SymbolKind.Number
-    } else if (rhs.base instanceof Nodes.StringLiteral) {
-      return SymbolKind.String
-    } else if (rhs.base instanceof Nodes.Arr) {
-      return SymbolKind.Array
-    } else {
+    } else if (lhs instanceof Nodes.ThisLiteral) {
       return SymbolKind.Property
+    } else {
+      return SymbolKind.Variable
     }
   } else if (rhs instanceof Nodes.Code) {
     if (container && container.kind === SymbolKind.Class) {
