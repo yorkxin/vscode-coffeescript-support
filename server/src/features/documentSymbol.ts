@@ -42,17 +42,17 @@ function getSymbolsFromBlock(block: Nodes.Block, container?: string): SymbolInfo
 
   block.eachChild(node => {
     if (node instanceof Nodes.Value) {
-      if (node.base instanceof Nodes.Obj) {
-        symbolInformation = symbolInformation.concat(getSymbolsFromObj(node.base, "", container))
-      }
+      node.traverseChildren(false, node => {
+        if (node instanceof Nodes.Obj) {
+          symbolInformation = symbolInformation.concat(getSymbolsFromObj(node, "", container))
+        }
+
+        return true
+      })
     }
 
     if (node instanceof Nodes.Class) {
       symbolInformation = symbolInformation.concat(getSymbolsFromClass(node))
-    }
-
-    if (node instanceof Nodes.Obj) {
-      symbolInformation = symbolInformation.concat(getSymbolsFromObj(node))
     }
 
     return true

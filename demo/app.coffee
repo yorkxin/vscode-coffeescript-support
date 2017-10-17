@@ -58,6 +58,13 @@ class App
     mo: (a, b) =>
       return a + b
 
+React.createElement('input', {
+  value:
+    type: 'string'
+
+  click: (target) ->
+    return true
+})
 
 class Apuri extends App
   constructor: () ->
