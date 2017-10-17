@@ -43,13 +43,15 @@ function getSymbolsFromBlock(block: Nodes.Block, container?: SymbolMetadata): Sy
 
   block.expressions.forEach(node => {
     if (node instanceof Nodes.Value) {
-      node.eachChild(child => {
-        if (child instanceof Nodes.Obj) {
-          symbolInformation = symbolInformation.concat(getSymbolsFromObj(child, container))
-        }
-
-        return true
-      })
+      if (node.base instanceof Nodes.Call) {
+        node.base.args.forEach(child => {
+          if (child instanceof Nodes.Value && child.base instanceof Nodes.Obj) {
+            symbolInformation = symbolInformation.concat(getSymbolsFromObj(child.base, container))
+          }
+        })
+      } else if (node.base instanceof Nodes.Obj) {
+        symbolInformation = symbolInformation.concat(getSymbolsFromObj(node.base, container))
+      }
     }
 
     if (node instanceof Nodes.Assign) {
