@@ -5,7 +5,7 @@ import { readFileByURI } from "../utils/fileReader"
 
 import { DocumentSymbolParams, SymbolInformation, SymbolKind, Range } from "vscode-languageserver"
 
-interface ContainerInfo {
+interface SymbolMetadata {
   name: string,
   kind: SymbolKind
 }
@@ -38,7 +38,7 @@ function getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
   return symbolInformation
 }
 
-function getSymbolsFromBlock(block: Nodes.Block, container?: ContainerInfo): SymbolInformation[] {
+function getSymbolsFromBlock(block: Nodes.Block, container?: SymbolMetadata): SymbolInformation[] {
   let symbolInformation: SymbolInformation[] = []
 
   block.expressions.forEach(node => {
@@ -66,7 +66,7 @@ function getSymbolsFromBlock(block: Nodes.Block, container?: ContainerInfo): Sym
   return symbolInformation
 }
 
-function getSymbolsFromObj(objNode: Nodes.Obj, container?: ContainerInfo): SymbolInformation[] {
+function getSymbolsFromObj(objNode: Nodes.Obj, container?: SymbolMetadata): SymbolInformation[] {
   let symbolInformation: SymbolInformation[] = []
 
   objNode.properties.forEach(property => {
@@ -76,45 +76,33 @@ function getSymbolsFromObj(objNode: Nodes.Obj, container?: ContainerInfo): Symbo
   return symbolInformation
 }
 
-function getSymbolsFromAssign(assign: Nodes.Assign, container?: ContainerInfo): SymbolInformation[] {
+function getSymbolsFromAssign(assign: Nodes.Assign, container?: SymbolMetadata): SymbolInformation[] {
   let symbolInformation: SymbolInformation[] = []
-  let lhs = assign.variable.base;
+  let lhs = assign.variable;
   let rhs = assign.value
 
-  if (lhs instanceof Nodes.Literal) {
-    let name: string;
-
-    if (lhs instanceof Nodes.ThisLiteral) {
-      name = _formatThisPropertyParam(assign.variable);
-    } else if (lhs instanceof Nodes.Literal) {
-      name = lhs.value;
-    }
-
-    let symbolKind = _determineSymbolKindByAssignment(lhs, rhs);
-
-    if (rhs instanceof Nodes.Code) {
-      name = `${name}(${_formatParamList(rhs.params)})`;
-    }
+  if (lhs.base instanceof Nodes.Literal) {
+    let symbolMetadata = _getSymbolMetadataByAssignment(lhs, rhs, container)
 
     let containerName: string = null
     if (container) {
       containerName = container.name
     }
 
-    symbolInformation.push(SymbolInformation.create(name, symbolKind, _createRange(assign.locationData), null, containerName));
+    symbolInformation.push(SymbolInformation.create(symbolMetadata.name, symbolMetadata.kind, _createRange(assign.locationData), null, containerName));
 
     if (rhs instanceof Nodes.Value && rhs.base instanceof Nodes.Obj) {
       let nextContainerName
 
       if (container) {
-        nextContainerName = `${container.name}.${name}`;
+        nextContainerName = `${container.name}.${symbolMetadata.name}`;
       } else {
-        nextContainerName = name
+        nextContainerName = symbolMetadata.name
       }
 
-      let nextContainer: ContainerInfo = {
+      let nextContainer: SymbolMetadata = {
         name: nextContainerName,
-        kind: symbolKind
+        kind: symbolMetadata.kind
       }
 
       symbolInformation = symbolInformation.concat(getSymbolsFromObj(rhs.base, nextContainer));
@@ -161,23 +149,39 @@ function _formatThisPropertyParam(name: Nodes.Value) {
   return "?"
 }
 
-function _determineSymbolKindByAssignment(lhs: Nodes.Literal, rhs: Nodes.Value | Nodes.Code, container?: ContainerInfo): SymbolKind {
+function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nodes.Code, container?: SymbolMetadata): SymbolMetadata {
+  let name: string;
+  let kind: SymbolKind
+
+  if (lhs.base instanceof Nodes.ThisLiteral) {
+    name = _formatThisPropertyParam(lhs);
+  } else if (lhs.base instanceof Nodes.Literal) {
+    name = lhs.base.value;
+  } else {
+    name = "(unknown)"
+  }
+
+  if (rhs instanceof Nodes.Code) {
+    name = `${name}(${_formatParamList(rhs.params)})`;
+  }
+
   if (rhs instanceof Nodes.Value) {
-    console.log(rhs)
     if (rhs.base instanceof Nodes.Obj) {
-      return SymbolKind.Namespace
+      kind = SymbolKind.Namespace
     } else if (lhs instanceof Nodes.ThisLiteral) {
-      return SymbolKind.Property
+      kind = SymbolKind.Property
     } else {
-      return SymbolKind.Variable
+      kind = SymbolKind.Variable
     }
   } else if (rhs instanceof Nodes.Code) {
     if (container && container.kind === SymbolKind.Class) {
-      return SymbolKind.Method
+      kind = SymbolKind.Method
     } else {
-      return SymbolKind.Function
+      kind = SymbolKind.Function
     }
   } else {
-    return SymbolKind.Variable
+    kind = SymbolKind.Variable
   }
+
+  return { name, kind }
 }
