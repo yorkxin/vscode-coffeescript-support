@@ -6,7 +6,7 @@ import { readFileByURI } from "../utils/fileReader"
 import { DocumentSymbolParams, SymbolInformation, SymbolKind, Range } from "vscode-languageserver"
 
 export default function documentSymbol(documentSymbolParams: DocumentSymbolParams): SymbolInformation[] {
-  let tree: Nodes.Base
+  let tree: Nodes.Block
   let src = readFileByURI(documentSymbolParams.textDocument.uri)
 
   try {
@@ -15,26 +15,7 @@ export default function documentSymbol(documentSymbolParams: DocumentSymbolParam
     return []
   }
 
-  let symbolInformation: SymbolInformation[] = [];
-
-  tree.traverseChildren(true, node => {
-    try {
-      if (node instanceof Nodes.Class) {
-        symbolInformation = symbolInformation.concat(getSymbolsFromClass(node))
-      }
-
-      if (node instanceof Nodes.Obj) {
-        console.log(node.parent)
-        symbolInformation = symbolInformation.concat(getSymbolsFromObj(node))
-      }
-    } catch (error) {
-      console.log("error in traverseChildren", node.locationData)
-    } finally {
-      return true
-    }
-  });
-
-  return symbolInformation;
+  return getSymbolsFromBlock(tree)
 };
 
 function getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
@@ -64,6 +45,14 @@ function getSymbolsFromBlock(block: Nodes.Block, container?: string): SymbolInfo
       if (node.base instanceof Nodes.Obj) {
         symbolInformation = symbolInformation.concat(getSymbolsFromObj(node.base, "", container))
       }
+    }
+
+    if (node instanceof Nodes.Class) {
+      symbolInformation = symbolInformation.concat(getSymbolsFromClass(node))
+    }
+
+    if (node instanceof Nodes.Obj) {
+      symbolInformation = symbolInformation.concat(getSymbolsFromObj(node))
     }
 
     return true
