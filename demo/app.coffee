@@ -73,6 +73,8 @@ class Apuri extends App
 # static func
 Apuri::sayhi = ->
 
+@::foo = ->
+
 class Afuri extends Apuri
 
 human = class

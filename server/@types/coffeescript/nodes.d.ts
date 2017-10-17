@@ -251,7 +251,7 @@ declare module "coffeescript/lib/coffeescript/nodes" {
   }
 
   export class Access extends Base {
-    name: IdentifierLiteral
+    name: IdentifierLiteral | PropertyName
   }
 
   export class Index extends Base {

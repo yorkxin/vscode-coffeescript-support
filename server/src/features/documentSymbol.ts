@@ -161,6 +161,15 @@ function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nod
     name = "(unknown)"
   }
 
+  let possiblePrototypeAccess = lhs.properties[0]
+  let possiblePrototypeName = lhs.properties[1]
+
+  if (possiblePrototypeAccess instanceof Nodes.Access && possiblePrototypeName instanceof Nodes.Access) {
+    if (possiblePrototypeAccess.name.value === "prototype") {
+      name = `${name}::${possiblePrototypeName.name.value}`
+    }
+  }
+
   if (rhs instanceof Nodes.Code) {
     name = `${name}(${_formatParamList(rhs.params)})`;
   }
