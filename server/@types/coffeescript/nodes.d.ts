@@ -186,7 +186,7 @@ declare module "coffeescript/lib/coffeescript/nodes" {
   export class AwaitReturn extends Return {}
 
   export class Value extends Base {
-    base: Obj | Literal | PropertyName | Code
+    base: Obj | Literal | PropertyName | Code | Call
     properties: Assign[] | Access[]
     isDefaultValue: boolean
 
@@ -226,7 +226,7 @@ declare module "coffeescript/lib/coffeescript/nodes" {
   }
 
   export class Call extends Base {
-    variable: Base
+    variable: Value
     args: Param[]
     // soak: boolean
     // token: Token

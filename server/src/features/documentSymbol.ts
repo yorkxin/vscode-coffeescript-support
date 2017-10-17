@@ -149,7 +149,7 @@ function _formatThisPropertyParam(name: Nodes.Value) {
   return "?"
 }
 
-function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nodes.Code, container?: SymbolMetadata): SymbolMetadata {
+function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nodes.Code | Nodes.Call, container?: SymbolMetadata): SymbolMetadata {
   let name: string;
   let kind: SymbolKind
 
@@ -168,6 +168,8 @@ function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nod
   if (rhs instanceof Nodes.Value) {
     if (rhs.base instanceof Nodes.Obj) {
       kind = SymbolKind.Namespace
+    } else if (rhs.base instanceof Nodes.Call && rhs.base.variable.base instanceof Nodes.IdentifierLiteral && rhs.base.variable.base.value === 'require') {
+      kind = SymbolKind.Package
     } else if (lhs instanceof Nodes.ThisLiteral) {
       kind = SymbolKind.Property
     } else {
