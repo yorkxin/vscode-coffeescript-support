@@ -17,17 +17,16 @@ export default function documentSymbol(documentSymbolParams: DocumentSymbolParam
 
   let symbolInformation: SymbolInformation[] = [];
 
-  // if (tree instanceof Nodes.Block) {
-  //   TODO: tree.expressions => Assign and Class
-  //   symbolInformation = symbolInformation.concat(getSymbolsFromBlock(tree, null))
-  // }
-
-  tree.traverseChildren(true, (node) => {
+  tree.traverseChildren(true, node => {
     try {
       if (node instanceof Nodes.Class) {
         symbolInformation = symbolInformation.concat(getSymbolsFromClass(node))
       }
-      return true;
+
+      if (node instanceof Nodes.Obj) {
+        console.log(node.parent)
+        symbolInformation = symbolInformation.concat(getSymbolsFromObj(node))
+      }
     } catch (error) {
       console.log("error in traverseChildren", node.locationData)
     } finally {
@@ -59,32 +58,47 @@ function getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
 
 function getSymbolsFromBlock(block: Nodes.Block, container?: string): SymbolInformation[] {
   let symbolInformation: SymbolInformation[] = []
+
   block.eachChild(node => {
     if (node instanceof Nodes.Value) {
       if (node.base instanceof Nodes.Obj) {
-        node.base.properties.forEach(property => {
-          if (property.variable.base instanceof Nodes.Literal) {
-            let name: string
-
-            if (property.variable.base instanceof Nodes.ThisLiteral) {
-              name = _formatThisPropertyParam(property.variable)
-            } else if (property.variable.base instanceof Nodes.Literal) {
-              name = property.variable.base.value
-            }
-
-            let symbolKind = _determineSymbolKindByRHS(property.value)
-
-            if (property.value instanceof Nodes.Code) {
-              name = `${name}(${_formatParamList(property.value.params)})`
-            }
-
-            symbolInformation.push(SymbolInformation.create(name, symbolKind, _createRange(property.locationData), null, container))
-          }
-        })
+        symbolInformation = symbolInformation.concat(getSymbolsFromObj(node.base, "", container))
       }
     }
 
     return true
+  })
+
+  return symbolInformation
+}
+
+function getSymbolsFromObj(objNode: Nodes.Obj, prefix: string = "", container?: string): SymbolInformation[] {
+  let symbolInformation: SymbolInformation[] = []
+
+  objNode.properties.forEach(property => {
+    if (property.variable.base instanceof Nodes.Literal) {
+      let name: string
+
+      if (property.variable.base instanceof Nodes.ThisLiteral) {
+        name = _formatThisPropertyParam(property.variable)
+      } else if (property.variable.base instanceof Nodes.Literal) {
+        name = property.variable.base.value
+      }
+
+      if (prefix !== '') {
+        name = `${prefix}.${name}`
+      }
+
+      let symbolKind = _determineSymbolKindByRHS(property.value)
+
+      if (property.value instanceof Nodes.Code) {
+        name = `${name}(${_formatParamList(property.value.params)})`
+      } else if (property.value instanceof Nodes.Value && property.value.base instanceof Nodes.Obj) {
+        symbolInformation = symbolInformation.concat(getSymbolsFromObj(property.value.base, name, container))
+      }
+
+      symbolInformation.push(SymbolInformation.create(name, symbolKind, _createRange(property.locationData), null, container))
+    }
   })
 
   return symbolInformation
