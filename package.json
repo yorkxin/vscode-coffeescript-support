@@ -7,7 +7,7 @@
   "publisher": "yorkxin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chitsaou/vscode-coffeescript"
+    "url": "https://github.com/chitsaou/vscode-coffeescript-support"
   },
   "scripts": {
     "postinstall": "cd server && npm install && cd ../client && npm install && cd ..",
