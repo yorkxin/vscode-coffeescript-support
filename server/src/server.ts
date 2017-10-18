@@ -3,12 +3,11 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 'use strict';
-/// <reference path="../@types/coffeescript/index.d.ts"/>
 
 import {
   IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
-  InitializeResult, TextDocumentPositionParams, CompletionItem,
-  CompletionItemKind
+  InitializeResult,
+  /* TextDocumentPositionParams, CompletionItem, CompletionItemKind */
 } from 'vscode-languageserver';
 
 import documentSymbol from "./features/documentSymbol"
@@ -48,67 +47,19 @@ documents.onDidChangeContent((change) => {
   validateTextDocument(change.document.uri);
 });
 
-// // The settings interface describe the server relevant settings part
-// interface Settings {
-// 	lspSample: ExampleSettings;
-// }
-
-// // These are the example settings we defined in the client's package.json
-// // file
-// interface ExampleSettings {
-// 	maxNumberOfProblems: number;
-// }
-
-// The settings have changed. Is send on server activation
-// as well.
-connection.onDidChangeConfiguration((_) => {
-  // let settings = <Settings>change.settings;
-  // maxNumberOfProblems = settings.lspSample.maxNumberOfProblems || 100;
-  // Revalidate any open text documents
-  documents.all().forEach((document) => validateTextDocument(document.uri));
-});
-
-connection.onDidChangeWatchedFiles((_change) => {
-  // Monitored files have change in VSCode
-  connection.console.log('We recevied an file change event');
-});
-
 connection.onDidChangeTextDocument((param) => {
   let diagnostics = validateTextDocument(param.textDocument.uri)
   connection.sendDiagnostics({ uri: param.textDocument.uri, diagnostics });
 })
 
-// This handler provides the initial list of the completion items.
+
+/*
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-  // The pass parameter contains the position of the text document in
-  // which code complete got requested. For the example we ignore this
-  // info and always provide the same completion items.
-  return [
-    {
-      label: 'TypeScript',
-      kind: CompletionItemKind.Text,
-      data: 1
-    },
-    {
-      label: 'JavaScript',
-      kind: CompletionItemKind.Text,
-      data: 2
-    }
-  ]
 });
 
-// This handler resolve additional information for the item selected in
-// the completion list.
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-  if (item.data === 1) {
-    item.detail = 'TypeScript details',
-      item.documentation = 'TypeScript documentation'
-  } else if (item.data === 2) {
-    item.detail = 'JavaScript details',
-      item.documentation = 'JavaScript documentation'
-  }
-  return item;
 });
+*/
 
 connection.onDocumentSymbol(documentSymbol)
 
