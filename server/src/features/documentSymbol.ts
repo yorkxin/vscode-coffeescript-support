@@ -130,55 +130,46 @@ function _formatParam(param: Nodes.Param): string {
 
   // constructor(@foo)
   if (param.name instanceof Nodes.Value) {
-    return _formatThisPropertyParam(param.name)
+    return formatAssignee(param.name)
   }
 
   return "???"
 }
 
-/**
- * Formats "@foo"
- * @param {Nodes.Value} name
- */
-function _formatThisPropertyParam(name: Nodes.Value) {
-  if (name.base instanceof Nodes.ThisLiteral) {
-    let firstProperty = name.properties[0]
-    if (firstProperty instanceof Nodes.Access) {
-      if (firstProperty.name.value === "prototype") {
-        // @::foo = ->
-        return "@"
-      } else {
-        // @foo = ->
-        return `@${firstProperty.name.value}`
-      }
+function formatAssignee(variable: Nodes.Value): string {
+  if (variable.base instanceof Nodes.Literal) {
+    let name = formatLiteral("", variable.base)
+
+    if (Array.isArray(variable.properties)) {
+      (variable.properties as (Nodes.Access | Nodes.Assign)[]).forEach(property => {
+        if (property instanceof Nodes.Access) {
+          name = formatLiteral(name, property.name)
+        }
+      })
+    }
+    return name
+  } else {
+    return "(unknown)"
+  }
+}
+
+function formatLiteral(context: string, literal: Nodes.Literal): string {
+  if (literal instanceof Nodes.ThisLiteral) {
+    return `@${context}`
+  } else if (literal.value === "prototype") {
+    return `${context}::`
+  } else {
+    if (context === "") {
+      return literal.value
+    } else {
+      return `${context}.${literal.value}`
     }
   }
-
-  return ""
 }
 
 function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nodes.Code | Nodes.Call, container?: SymbolMetadata): SymbolMetadata {
-  let name: string;
+  let name = formatAssignee(lhs)
   let kind: SymbolKind
-
-  if (lhs.base instanceof Nodes.ThisLiteral) {
-    name = _formatThisPropertyParam(lhs);
-  } else if (lhs.base instanceof Nodes.Literal) {
-    name = lhs.base.value;
-  } else {
-    name = "(unknown)"
-  }
-
-  // TODO: merge this logic with _formatThisPropertyParam
-  let possiblePrototypeAccess = lhs.properties[0]
-  let possiblePrototypeName = lhs.properties[1]
-
-  if (possiblePrototypeAccess instanceof Nodes.Access && possiblePrototypeName instanceof Nodes.Access) {
-    if (possiblePrototypeAccess.name.value === "prototype") {
-      name = `${name}::${possiblePrototypeName.name.value}`
-    }
-  }
-  // TODO: /above
 
   if (rhs instanceof Nodes.Code) {
     name = `${name}(${_formatParamList(rhs.params)})`;

@@ -79,3 +79,8 @@ class Afuri extends Apuri
 
 human = class
   constructor: (@name) ->
+
+module.exports = App
+module.exports.KONSTANT = 'constnat'
+
+exports.abc = def
