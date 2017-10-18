@@ -6,10 +6,8 @@
 
 import * as path from 'path';
 
-import { workspace, ExtensionContext, languages } from 'vscode';
+import { workspace, ExtensionContext } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient';
-
-import CoffeeScriptDocumentSymbolProvider from './documentSymbolProvider'
 
 const DOC_SELECTORS = [
 	{ language: 'coffeescript' }
@@ -48,6 +46,4 @@ export function activate(context: ExtensionContext) {
 	// Push the disposable to the context's subscriptions so that the
 	// client can be deactivated on extension deactivation
 	context.subscriptions.push(disposable);
-
-	context.subscriptions.push(languages.registerDocumentSymbolProvider(DOC_SELECTORS, new CoffeeScriptDocumentSymbolProvider(client)));
 }
