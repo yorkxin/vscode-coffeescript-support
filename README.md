@@ -1,21 +1,35 @@
-# README
-## This is the README for the "languageprovider-sample" 
--------------------
+# CoffeeScript Support for Visual Studio Code
 
-This folder contains a sample VS code extension that demonstrates an extension that runs a language server
+A VSCode extension that helps you programming in CoffeeScript.
 
-The extension observes all 'plaintext' documents (documents from all editors not associated with a language)
-and uses the server to provide validation and completion proposals.
+## Demo
 
-The code for the extension is in the 'client' folder. It uses the 'vscode-languageclient' node module to launch the language server.
+<video src="./demo.mp4" autoplay></video>
 
-The language server is located in the 'server' folder. 
+## Features
 
+### Supported
 
-# How to run locally
+- [x] Syntax check on save
+- [x] Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
+
+### Planned
+
+- [ ] Show completion proposals
+- [ ] Show all All Symbol Definitions in Workspace ("Go to symbol in workspace" command)
+- [ ] Show definition of a symbol
+- [ ] Help with function signatures
+
+Low priority
+
+- [ ] Highlight All Occurrences of a Symbol in a Document
+- [ ] Show hover box of a symbol
+
+Note: features are described on [Visual Studio Code Language Extension Guidelines](https://code.visualstudio.com/docs/extensionAPI/language-support) page.
+
+## How to Debug
+
 * `npm install` to initialize the extension and the server
-* `npm run compile` to compile the extension and the server
-* open this folder in VS Code. In the Debug viewlet, run 'Launch Client' from drop-down to launch the extension and attach to the extension.
-* create a file `test.txt`, and type `typescript`. You should see a validation error.
-* to debug the server use the 'Attach to Server' launch config.
-* set breakpoints in the client or the server.
+* Open this folder in VS Code. In the Debug viewlet, run 'Launch Client' from drop-down to launch the extension and attach to the extension.
+* Open `demo/app.coffee`
+* Use commands, for example, "Go to symbol in file..." command.
