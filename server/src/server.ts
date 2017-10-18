@@ -6,9 +6,9 @@
 /// <reference path="../@types/coffeescript/index.d.ts"/>
 
 import {
-	IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
-	InitializeResult, TextDocumentPositionParams, CompletionItem,
-	CompletionItemKind
+  IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
+  InitializeResult, TextDocumentPositionParams, CompletionItem,
+  CompletionItemKind
 } from 'vscode-languageserver';
 
 import documentSymbol from "./features/documentSymbol"
@@ -28,24 +28,24 @@ documents.listen(connection);
 // in the passed params the rootPath of the workspace plus the client capabilites.
 // let workspaceRoot: string;
 connection.onInitialize((_): InitializeResult => {
-	// workspaceRoot = params.rootPath;
-	return {
-		capabilities: {
-			// Tell the client that the server works in FULL text document sync mode
-			textDocumentSync: documents.syncKind,
-			documentSymbolProvider: true,
-			// Tell the client that the server support code complete
-			completionProvider: {
-				resolveProvider: true
-			}
-		}
-	}
+  // workspaceRoot = params.rootPath;
+  return {
+    capabilities: {
+      // Tell the client that the server works in FULL text document sync mode
+      textDocumentSync: documents.syncKind,
+      documentSymbolProvider: true,
+      // Tell the client that the server support code complete
+      completionProvider: {
+        resolveProvider: true
+      }
+    }
+  }
 });
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
-	validateTextDocument(change.document.uri);
+  validateTextDocument(change.document.uri);
 });
 
 // // The settings interface describe the server relevant settings part
@@ -62,73 +62,73 @@ documents.onDidChangeContent((change) => {
 // The settings have changed. Is send on server activation
 // as well.
 connection.onDidChangeConfiguration((_) => {
-	// let settings = <Settings>change.settings;
-	// maxNumberOfProblems = settings.lspSample.maxNumberOfProblems || 100;
-	// Revalidate any open text documents
-	documents.all().forEach((document) => validateTextDocument(document.uri));
+  // let settings = <Settings>change.settings;
+  // maxNumberOfProblems = settings.lspSample.maxNumberOfProblems || 100;
+  // Revalidate any open text documents
+  documents.all().forEach((document) => validateTextDocument(document.uri));
 });
 
 connection.onDidChangeWatchedFiles((_change) => {
-	// Monitored files have change in VSCode
-	connection.console.log('We recevied an file change event');
+  // Monitored files have change in VSCode
+  connection.console.log('We recevied an file change event');
 });
 
 connection.onDidChangeTextDocument((param) => {
-	let diagnostics = validateTextDocument(param.textDocument.uri)
-	connection.sendDiagnostics({ uri: param.textDocument.uri, diagnostics });
+  let diagnostics = validateTextDocument(param.textDocument.uri)
+  connection.sendDiagnostics({ uri: param.textDocument.uri, diagnostics });
 })
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-	// The pass parameter contains the position of the text document in
-	// which code complete got requested. For the example we ignore this
-	// info and always provide the same completion items.
-	return [
-		{
-			label: 'TypeScript',
-			kind: CompletionItemKind.Text,
-			data: 1
-		},
-		{
-			label: 'JavaScript',
-			kind: CompletionItemKind.Text,
-			data: 2
-		}
-	]
+  // The pass parameter contains the position of the text document in
+  // which code complete got requested. For the example we ignore this
+  // info and always provide the same completion items.
+  return [
+    {
+      label: 'TypeScript',
+      kind: CompletionItemKind.Text,
+      data: 1
+    },
+    {
+      label: 'JavaScript',
+      kind: CompletionItemKind.Text,
+      data: 2
+    }
+  ]
 });
 
 // This handler resolve additional information for the item selected in
 // the completion list.
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-	if (item.data === 1) {
-		item.detail = 'TypeScript details',
-			item.documentation = 'TypeScript documentation'
-	} else if (item.data === 2) {
-		item.detail = 'JavaScript details',
-			item.documentation = 'JavaScript documentation'
-	}
-	return item;
+  if (item.data === 1) {
+    item.detail = 'TypeScript details',
+      item.documentation = 'TypeScript documentation'
+  } else if (item.data === 2) {
+    item.detail = 'JavaScript details',
+      item.documentation = 'JavaScript documentation'
+  }
+  return item;
 });
 
 connection.onDocumentSymbol(documentSymbol)
 
 /*
 connection.onDidOpenTextDocument((params) => {
-	// A text document got opened in VSCode.
-	// params.uri uniquely identifies the document. For documents store on disk this is a file URI.
-	// params.text the initial full content of the document.
-	connection.console.log(`${params.textDocument.uri} opened.`);
+  // A text document got opened in VSCode.
+  // params.uri uniquely identifies the document. For documents store on disk this is a file URI.
+  // params.text the initial full content of the document.
+  connection.console.log(`${params.textDocument.uri} opened.`);
 });
 connection.onDidChangeTextDocument((params) => {
-	// The content of a text document did change in VSCode.
-	// params.uri uniquely identifies the document.
-	// params.contentChanges describe the content changes to the document.
-	connection.console.log(`${params.textDocument.uri} changed: ${JSON.stringify(params.contentChanges)}`);
+  // The content of a text document did change in VSCode.
+  // params.uri uniquely identifies the document.
+  // params.contentChanges describe the content changes to the document.
+  connection.console.log(`${params.textDocument.uri} changed: ${JSON.stringify(params.contentChanges)}`);
 });
 connection.onDidCloseTextDocument((params) => {
-	// A text document got closed in VSCode.
-	// params.uri uniquely identifies the document.
-	connection.console.log(`${params.textDocument.uri} closed.`);
+  // A text document got closed in VSCode.
+  // params.uri uniquely identifies the document.
+  connection.console.log(`${params.textDocument.uri} closed.`);
 });
 */
 

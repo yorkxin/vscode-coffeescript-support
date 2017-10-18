@@ -1,23 +1,23 @@
 {
-	"name": "coffeescript-support",
-	"description": "Language Server for Advanced CoffeeScript Support",
-	"version": "0.0.1",
-	"author": "Yucheng Chuang",
-	"license": "MIT",
-	"engines": {
-		"node": "*"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/chitsaou/vscode-coffeescript"
-	},
-	"dependencies": {
-		"coffeescript": "^2.0.1",
-		"vscode-languageserver": "^3.4.2"
-	},
-	"scripts": {
-		"installServer": "installServerIntoExtension ../client ./package.json ./tsconfig.json",
-		"compile": "installServerIntoExtension ../client ./package.json ./tsconfig.json && tsc -p .",
-		"watch": "installServerIntoExtension ../client ./package.json ./tsconfig.json && tsc -w -p ."
-	}
+  "name": "coffeescript-support",
+  "description": "Language Server for Advanced CoffeeScript Support",
+  "version": "0.0.1",
+  "author": "Yucheng Chuang",
+  "license": "MIT",
+  "engines": {
+    "node": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chitsaou/vscode-coffeescript"
+  },
+  "dependencies": {
+    "coffeescript": "^2.0.1",
+    "vscode-languageserver": "^3.4.2"
+  },
+  "scripts": {
+    "installServer": "installServerIntoExtension ../client ./package.json ./tsconfig.json",
+    "compile": "installServerIntoExtension ../client ./package.json ./tsconfig.json && tsc -p .",
+    "watch": "installServerIntoExtension ../client ./package.json ./tsconfig.json && tsc -w -p ."
+  }
 }

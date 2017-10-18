@@ -1,35 +1,35 @@
 {
-	"name": "coffeescript-support",
-	"description": "Advanced CoffeeScript Support for VSCode",
-	"author": "Yucheng Chuang",
-	"license": "MIT",
-	"version": "0.0.1",
-	"publisher": "yorkxin",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/chitsaou/vscode-coffeescript"
-	},
-	"engines": {
-		"vscode": "^1.16.0"
-	},
-	"categories": [
-		"Languages"
-	],
-	"activationEvents": [
-		"onLanguage:coffeescript"
-	],
-	"main": "./out/src/extension",
-	"contributes": {
-	},
-	"scripts": {
-		"vscode:prepublish": "tsc -p ./",
-		"compile": "tsc -p ./",
-		"watch": "tsc -w -p ./",
-		"update-vscode": "node ./node_modules/vscode/bin/install",
-		"postinstall": "node ./node_modules/vscode/bin/install"
-	},
-	"dependencies": {
-		"vscode": "^1.1.5",
-		"vscode-languageclient": "^3.4.2"
-	}
+  "name": "coffeescript-support",
+  "description": "Advanced CoffeeScript Support for VSCode",
+  "author": "Yucheng Chuang",
+  "license": "MIT",
+  "version": "0.0.1",
+  "publisher": "yorkxin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chitsaou/vscode-coffeescript"
+  },
+  "engines": {
+    "vscode": "^1.16.0"
+  },
+  "categories": [
+    "Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:coffeescript"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "update-vscode": "node ./node_modules/vscode/bin/install",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "dependencies": {
+    "vscode": "^1.1.5",
+    "vscode-languageclient": "^3.4.2"
+  }
 }
