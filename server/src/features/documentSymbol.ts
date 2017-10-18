@@ -15,6 +15,7 @@ export default function documentSymbol(documentSymbolParams: DocumentSymbolParam
     let src = readFileByURI(documentSymbolParams.textDocument.uri)
     return getSymbolsFromBlock(CoffeeScript.nodes(src))
   } catch (error) {
+    console.error(error)
     return []
   }
 };
@@ -137,34 +138,43 @@ function _formatParam(param: Nodes.Param): string {
 }
 
 function formatAssignee(variable: Nodes.Value): string {
+  let literals: Nodes.Literal[] = []
+
   if (variable.base instanceof Nodes.Literal) {
-    let name = formatLiteral("", variable.base)
-
-    if (Array.isArray(variable.properties)) {
-      (variable.properties as (Nodes.Access | Nodes.Assign)[]).forEach(property => {
-        if (property instanceof Nodes.Access) {
-          name = formatLiteral(name, property.name)
-        }
-      })
-    }
-    return name
-  } else {
-    return "(unknown)"
+    literals.push(variable.base)
   }
-}
 
-function formatLiteral(context: string, literal: Nodes.Literal): string {
-  if (literal instanceof Nodes.ThisLiteral) {
-    return `@${context}`
-  } else if (literal.value === "prototype") {
-    return `${context}::`
-  } else {
-    if (context === "") {
-      return literal.value
+  let properties = variable.properties as (Nodes.Access | Nodes.Assign)[]
+
+  if (properties instanceof Array) {
+    properties.forEach(property => {
+      if (property instanceof Nodes.Access && property.name instanceof Nodes.Literal) {
+        literals.push(property.name)
+      }
+    })
+  }
+
+  let tokens: string[] = []
+
+  literals.forEach((literal, index) => {
+    if (literal instanceof Nodes.ThisLiteral) {
+      tokens.push('@')
+    } else if (literal.value === "prototype") {
+      tokens.push('::')
     } else {
-      return `${context}.${literal.value}`
+      if (index !== 0) {
+        // check previous
+        let previous = tokens[index - 1]
+        if (!(previous === '@' || previous === '::')) {
+          tokens.push('.')
+        }
+      }
+
+      tokens.push(literal.value)
     }
-  }
+  })
+
+  return tokens.join('')
 }
 
 function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nodes.Code | Nodes.Call, container?: SymbolMetadata): SymbolMetadata {
