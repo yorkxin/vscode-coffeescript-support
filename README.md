@@ -4,7 +4,7 @@ A VSCode extension that helps you programming in CoffeeScript.
 
 ## Demo
 
-<video src="./demo.mp4" autoplay></video>
+![](./assets/demo.gif)
 
 ## Features
 
