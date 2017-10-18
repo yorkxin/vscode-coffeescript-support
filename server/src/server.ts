@@ -32,11 +32,7 @@ connection.onInitialize((_): InitializeResult => {
     capabilities: {
       // Tell the client that the server works in FULL text document sync mode
       textDocumentSync: documents.syncKind,
-      documentSymbolProvider: true,
-      // Tell the client that the server support code complete
-      completionProvider: {
-        resolveProvider: true
-      }
+      documentSymbolProvider: true
     }
   }
 });
