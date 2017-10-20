@@ -4,7 +4,7 @@ Helps you programming in CoffeeScript.
 
 ## Demo
 
-![](./assets/demo.gif)
+![](https://github.com/chitsaou/vscode-coffeescript-support/raw/master/client/assets/demo.gif)
 
 ### Supported
 
