@@ -318,7 +318,7 @@ declare module "coffeescript/lib/coffeescript/nodes" {
   export class ExportSpecifier extends ModuleSpecifier {}
 
   class Assign extends Base {
-    variable: Value
+    variable?: Value
     value: Value | Code
     context: string
     options: {

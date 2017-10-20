@@ -84,7 +84,7 @@ function getSymbolsFromAssign(assign: Nodes.Assign, container?: SymbolMetadata):
   let lhs = assign.variable;
   let rhs = assign.value
 
-  if (lhs.base instanceof Nodes.Literal) {
+  if (lhs instanceof Nodes.Value && lhs.base instanceof Nodes.Literal) {
     let symbolMetadata = _getSymbolMetadataByAssignment(lhs, rhs, container)
 
     let containerName: string = null

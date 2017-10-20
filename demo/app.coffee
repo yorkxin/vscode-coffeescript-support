@@ -84,3 +84,5 @@ module.exports = App
 module.exports.KONSTANT = 'constnat'
 
 exports.abc = def
+exports.foo = { bar, baz }
+exports.bar = { baz: 1 }
