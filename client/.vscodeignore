@@ -7,3 +7,6 @@ src/**
 .gitignore
 tsconfig.json
 vsc-extension-quickstart.md
+
+assets/*.pxm
+assets/*.mp4

@@ -2,10 +2,6 @@
 
 A VSCode extension that helps you programming in CoffeeScript.
 
-## Demo
-
-![](./assets/demo.gif)
-
 ## Features
 
 ### Supported

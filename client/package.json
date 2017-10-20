@@ -15,7 +15,7 @@
   "categories": [
     "Languages"
   ],
-  "icon": "icon.png",
+  "icon": "assets/icon.png",
   "activationEvents": [
     "onLanguage:coffeescript"
   ],
