@@ -2,6 +2,8 @@
 
 A VSCode extension that helps you programming in CoffeeScript.
 
+To install, visit: https://marketplace.visualstudio.com/items?itemName=yorkxin.coffeescript-support
+
 ## Features
 
 ### Supported
