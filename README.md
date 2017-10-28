@@ -8,7 +8,7 @@ To install, visit: https://marketplace.visualstudio.com/items?itemName=yorkxin.c
 
 ### Supported
 
-- :ballot_box_with_check: Syntax check on save
+- :ballot_box_with_check: Syntax check while typing
 - :ballot_box_with_check: Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
 
 ### Planned
@@ -24,6 +24,10 @@ Low priority
 - Show hover box of a symbol
 
 Note: features are described on [Visual Studio Code Language Extension Guidelines](https://code.visualstudio.com/docs/extensionAPI/language-support) page.
+
+## Testing
+
+* `cd server && npm test`
 
 ## How to Debug
 
