@@ -4,10 +4,10 @@ Helps you programming in CoffeeScript.
 
 ### Supported
 
-- [x] Syntax check on save
-- [x] Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
+- Syntax check on save
+- Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
 
-For other planned features, see https://github.com/chitsaou/vscode-coffeescript-support .
+For other planned features, issues and source code, see https://github.com/chitsaou/vscode-coffeescript-support .
 
 ## Demo
 
