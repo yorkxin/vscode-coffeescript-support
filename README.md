@@ -8,20 +8,20 @@ To install, visit: https://marketplace.visualstudio.com/items?itemName=yorkxin.c
 
 ### Supported
 
-- [x] Syntax check on save
-- [x] Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
+- :ballot_box_with_check: Syntax check on save
+- :ballot_box_with_check: Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
 
 ### Planned
 
-- [ ] Show completion proposals
-- [ ] Show all All Symbol Definitions in Workspace ("Go to symbol in workspace" command)
-- [ ] Show definition of a symbol
-- [ ] Help with function signatures
+- Show completion proposals
+- Show all All Symbol Definitions in Workspace ("Go to symbol in workspace" command)
+- Show definition of a symbol
+- Help with function signatures
 
 Low priority
 
-- [ ] Highlight All Occurrences of a Symbol in a Document
-- [ ] Show hover box of a symbol
+- Highlight All Occurrences of a Symbol in a Document
+- Show hover box of a symbol
 
 Note: features are described on [Visual Studio Code Language Extension Guidelines](https://code.visualstudio.com/docs/extensionAPI/language-support) page.
 
@@ -31,3 +31,7 @@ Note: features are described on [Visual Studio Code Language Extension Guideline
 * Open this folder in VS Code. In the Debug viewlet, run 'Launch Client' from drop-down to launch the extension and attach to the extension.
 * Open `demo/app.coffee`
 * Use commands, for example, "Go to symbol in file..." command.
+
+## License
+
+MIT License. See [License.txt](./License.txt)
