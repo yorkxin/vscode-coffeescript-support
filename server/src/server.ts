@@ -6,12 +6,12 @@
 
 import {
   IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
-  InitializeResult,
-  /* TextDocumentPositionParams, CompletionItem, CompletionItemKind */
+  InitializeResult
 } from 'vscode-languageserver';
 
-import documentSymbol from "./features/documentSymbol"
-import validateTextDocument from "./features/validateTextDocument"
+import { documentSymbol } from "./features/documentSymbol"
+import { validateTextDocument } from "./features/validateTextDocument"
+import { readFileByURI } from "./utils/fileReader"
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
 let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -39,15 +39,10 @@ connection.onInitialize((_): InitializeResult => {
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent((change) => {
-  validateTextDocument(change.document.uri);
+documents.onDidChangeContent(change => {
+  const diagnostics = validateTextDocument(change.document.getText())
+  connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
 });
-
-connection.onDidChangeTextDocument((param) => {
-  let diagnostics = validateTextDocument(param.textDocument.uri)
-  connection.sendDiagnostics({ uri: param.textDocument.uri, diagnostics });
-})
-
 
 /*
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
@@ -57,7 +52,15 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 });
 */
 
-connection.onDocumentSymbol(documentSymbol)
+connection.onDocumentSymbol(params => {
+  if (/file:\/\//.test(params.textDocument.uri)) {
+    const src = readFileByURI(params.textDocument.uri)
+    return documentSymbol(src)
+  } else {
+    // TODO: find a way to get content of Untitled tab
+    return []
+  }
+})
 
 /*
 connection.onDidOpenTextDocument((params) => {

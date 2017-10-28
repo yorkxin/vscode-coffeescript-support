@@ -12,4 +12,3 @@ export function readFileByPath(path: string): string {
 export function readFileByURI(uri: string): string {
   return this.readFileByPath(this.uriToPath(uri))
 }
-

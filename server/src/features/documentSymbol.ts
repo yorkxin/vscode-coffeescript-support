@@ -1,24 +1,20 @@
 import * as CoffeeScript from 'coffeescript'
 import * as Nodes from 'coffeescript/lib/coffeescript/nodes'
 
-import { readFileByURI } from "../utils/fileReader"
-
-import { DocumentSymbolParams, SymbolInformation, SymbolKind, Range } from "vscode-languageserver"
+import { SymbolInformation, SymbolKind, Range } from "vscode-languageserver"
 
 interface SymbolMetadata {
   name: string,
   kind: SymbolKind
 }
 
-export default function documentSymbol(documentSymbolParams: DocumentSymbolParams): SymbolInformation[] {
+export function documentSymbol(src: string): SymbolInformation[] {
   try {
-    let src = readFileByURI(documentSymbolParams.textDocument.uri)
     return getSymbolsFromBlock(CoffeeScript.nodes(src))
-  } catch (error) {
-    console.error(error)
+  } catch {
     return []
   }
-};
+}
 
 function getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
   let symbolInformation: SymbolInformation[] = []
