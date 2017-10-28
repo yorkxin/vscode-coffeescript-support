@@ -36,6 +36,21 @@ Note: features are described on [Visual Studio Code Language Extension Guideline
 * Open `demo/app.coffee`
 * Use commands, for example, "Go to symbol in file..." command.
 
+## Release
+
+For maintainer only.
+
+```
+# in root
+npm run compile
+
+# ... version++ for client/package.json
+
+cd client
+vsce package # -> get VSIX file
+vsce publish # -> push to VSCode Marketplace
+```
+
 ## License
 
 MIT License. See [License.txt](./License.txt)
