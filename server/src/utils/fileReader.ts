@@ -1,8 +1,9 @@
 import * as fs from 'fs'
-import * as URL from 'url'
+import Uri from 'vscode-uri'
 
 export function uriToPath(uri: string): string {
-  return URL.parse(uri).path
+  // This decodes url-encoded chars such as `@` or `:` (used in Windows)
+  return Uri.parse(uri).fsPath
 }
 
 export function readFileByPath(path: string): string {
