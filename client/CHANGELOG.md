@@ -1,3 +1,9 @@
+# 0.1.3
+
+Fixes:
+
+- It now works for paths with non-alphanumeric characters such as `@` or `:` (sorry Windows users, it works now)
+
 # 0.1.2
 
 Features:
