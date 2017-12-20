@@ -1,0 +1,3 @@
+## Checklist
+
+- [ ] `client/CHANGELOG.md`
