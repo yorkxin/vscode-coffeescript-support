@@ -1,3 +1,9 @@
+# 0.1.4
+
+Fixes:
+
+- Fix the problem that syntax check may not work in certain cases.
+
 # 0.1.3
 
 Fixes:

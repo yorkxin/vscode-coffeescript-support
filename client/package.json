@@ -3,7 +3,7 @@
   "description": "Advanced CoffeeScript Support for VSCode",
   "author": "Yucheng Chuang",
   "license": "MIT",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "yorkxin",
   "repository": {
     "type": "git",
