@@ -21,13 +21,13 @@ export class SymbolIndex {
     let start: Date, end: Date
     const files = this._glob(root, PATTERN)
     start = new Date()
-    console.debug("index start")
+    console.log("index start")
 
     return Promise.all(files.map(file => this.indexFile(file)))
       .then(() => {
         end = new Date()
         let duration = (end.getTime() - start.getTime()) / 1000
-        console.debug("index done, duration=", duration, "seconds")
+        console.log("index done, duration=", duration, "seconds")
       })
   }
 
@@ -56,10 +56,10 @@ export class SymbolIndex {
   }
 
   _glob(dir: string, pattern: string): string[] {
-    console.debug((new Date()).toISOString(), "glob start")
+    console.log((new Date()).toISOString(), "glob start")
     const files = glob.sync(pattern, { cwd: dir, realpath: true })
-    console.debug((new Date()).toISOString(), "glob end")
-    console.debug("found files:", files.length)
+    console.log((new Date()).toISOString(), "glob end")
+    console.log("found files:", files.length)
     return files
   }
 }
