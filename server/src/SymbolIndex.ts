@@ -18,17 +18,12 @@ export class SymbolIndex {
   }
 
   indexDirectory(root: string): Thenable<void> {
-    let start: Date, end: Date
     const files = this._glob(root, PATTERN)
-    start = new Date()
-    console.log("index start")
 
+    console.log("index start")
+    console.time("index")
     return Promise.all(files.map(file => this.indexFile(file)))
-      .then(() => {
-        end = new Date()
-        let duration = (end.getTime() - start.getTime()) / 1000
-        console.log("index done, duration=", duration, "seconds")
-      })
+      .then(() => console.timeEnd("index"))
   }
 
   indexFile(path: string): Thenable<void> {
@@ -56,9 +51,10 @@ export class SymbolIndex {
   }
 
   _glob(dir: string, pattern: string): string[] {
-    console.log((new Date()).toISOString(), "glob start")
+    console.log("glob start")
+    console.time("glob")
     const files = glob.sync(pattern, { cwd: dir, realpath: true })
-    console.log((new Date()).toISOString(), "glob end")
+    console.timeEnd("glob")
     console.log("found files:", files.length)
     return files
   }

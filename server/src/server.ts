@@ -34,9 +34,7 @@ connection.onInitialize((params): InitializeResult => {
   workspaceRoot = params.rootUri;
 
   symbolIndex = new SymbolIndex()
-  symbolIndex.indexDirectory(uriToPath(workspaceRoot)).then(() => {
-    console.log("index done")
-  })
+  symbolIndex.indexDirectory(uriToPath(workspaceRoot))
 
   return {
     capabilities: {
