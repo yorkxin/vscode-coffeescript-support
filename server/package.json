@@ -15,6 +15,7 @@
     "coffeescript": "^2.1.0",
     "glob": "^7.1.2",
     "lokijs": "^1.5.1",
+    "nodegit": "^0.20.3",
     "vscode-languageserver": "^3.4.2"
   },
   "scripts": {
@@ -28,6 +29,7 @@
     "@types/glob": "^5.0.34",
     "@types/lokijs": "^1.5.0",
     "@types/mocha": "^2.2.44",
+    "@types/nodegit": "^0.18.5",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
     "ts-node": "^3.3.0"
