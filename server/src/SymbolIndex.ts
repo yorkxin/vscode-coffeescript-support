@@ -47,7 +47,7 @@ export class SymbolIndex {
   find(query: string) {
     const pattern = new RegExp(`${query}`)
     return this.symbols.find({ name: { '$regex': pattern }})
-      .map((doc: SymbolInformation) => SymbolInformation.create(doc.name, doc.kind, doc.location.range, doc.containerName))
+      .map((doc: SymbolInformation) => SymbolInformation.create(doc.name, doc.kind, doc.location.range, doc.location.uri, doc.containerName))
   }
 
   _glob(dir: string, pattern: string): string[] {
