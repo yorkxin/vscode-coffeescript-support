@@ -6,12 +6,14 @@
 
 import {
   IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
-  InitializeResult
+  InitializeResult,
+  SymbolInformation
 } from 'vscode-languageserver';
 
 import { documentSymbol } from "./features/documentSymbol"
 import { validateTextDocument } from "./features/validateTextDocument"
-import { readFileByURI } from "./utils/fileReader"
+import { readFileByURI, uriToPath } from "./utils/fileReader"
+import { SymbolIndex } from "./SymbolIndex"
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
 let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -25,14 +27,23 @@ documents.listen(connection);
 
 // After the server has started the client sends an initilize request. The server receives
 // in the passed params the rootPath of the workspace plus the client capabilites.
-// let workspaceRoot: string;
-connection.onInitialize((_): InitializeResult => {
-  // workspaceRoot = params.rootPath;
+let workspaceRoot: string;
+let symbolIndex: SymbolIndex;
+
+connection.onInitialize((params): InitializeResult => {
+  workspaceRoot = params.rootUri;
+
+  symbolIndex = new SymbolIndex()
+  symbolIndex.indexDirectory(uriToPath(workspaceRoot)).then(() => {
+    console.log("index done")
+  })
+
   return {
     capabilities: {
       // Tell the client that the server works in FULL text document sync mode
       textDocumentSync: documents.syncKind,
-      documentSymbolProvider: true
+      documentSymbolProvider: true,
+      workspaceSymbolProvider: true
     }
   }
 });
@@ -58,6 +69,14 @@ connection.onDocumentSymbol(params => {
     return documentSymbol(src)
   } else {
     // TODO: find a way to get content of Untitled tab
+    return []
+  }
+})
+
+connection.onWorkspaceSymbol((params): SymbolInformation[] => {
+  if (params.query.length > 0) {
+    return symbolIndex.find(params.query)
+  } else {
     return []
   }
 })
