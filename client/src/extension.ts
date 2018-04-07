@@ -6,7 +6,7 @@
 
 import * as path from 'path';
 
-import { ExtensionContext } from 'vscode';
+import { ExtensionContext, workspace } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient';
 
 const DOC_SELECTORS = [
@@ -44,4 +44,13 @@ export function activate(context: ExtensionContext) {
   // Push the disposable to the context's subscriptions so that the
   // client can be deactivated on extension deactivation
   context.subscriptions.push(disposable);
+
+  client.onReady().then(() => {
+    workspace.findFiles("**/*.coffee")
+      .then(fileDescriptors => {
+        const files = fileDescriptors.map(file => file.path)
+        console.log("Found ", files.length, " .coffee files")
+        client.sendRequest('custom/indexFiles', { files })
+      })
+  })
 }

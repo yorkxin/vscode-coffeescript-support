@@ -12,7 +12,7 @@ import {
 
 import { documentSymbol } from "./features/documentSymbol"
 import { validateTextDocument } from "./features/validateTextDocument"
-import { readFileByURI, uriToPath } from "./utils/fileReader"
+import { readFileByURI } from "./utils/fileReader"
 import { SymbolIndex } from "./SymbolIndex"
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
@@ -27,14 +27,10 @@ documents.listen(connection);
 
 // After the server has started the client sends an initilize request. The server receives
 // in the passed params the rootPath of the workspace plus the client capabilites.
-let workspaceRoot: string;
 let symbolIndex: SymbolIndex;
 
-connection.onInitialize((params): InitializeResult => {
-  workspaceRoot = params.rootUri;
-
+connection.onInitialize((_): InitializeResult => {
   symbolIndex = new SymbolIndex()
-  symbolIndex.indexDirectory(uriToPath(workspaceRoot))
 
   return {
     capabilities: {
@@ -45,6 +41,11 @@ connection.onInitialize((params): InitializeResult => {
     }
   }
 });
+
+connection.onRequest('custom/indexFiles', (params) => {
+  console.log('custom/indexFiles')
+  return symbolIndex.indexFiles(params.files)
+})
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
