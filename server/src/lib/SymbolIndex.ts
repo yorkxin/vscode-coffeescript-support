@@ -1,18 +1,20 @@
 import * as fs from "fs";
 import * as Loki from "lokijs";
-import { documentSymbol } from "./features/documentSymbol"
+import { Parser } from "./Parser"
 import { SymbolInformation } from "vscode-languageserver";
 import Uri from 'vscode-uri'
 
 export class SymbolIndex {
   db: Loki;
   symbols: Loki.Collection
+  parser: Parser
 
   constructor() {
     this.db = new Loki("");
     this.symbols = this.db.addCollection("symbols", {
       indices: ['name']
     })
+    this.parser = new Parser()
   }
 
   indexFiles(uris: Array<Uri>): Thenable<void> {
@@ -34,7 +36,7 @@ export class SymbolIndex {
         fsPath = `file://${path}`
       }
 
-      documentSymbol(fs.readFileSync(path, 'utf-8')).forEach((documentSymbol) => {
+      this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8')).forEach((documentSymbol) => {
         this.symbols.insert({
           name: documentSymbol.name,
           kind: documentSymbol.kind,

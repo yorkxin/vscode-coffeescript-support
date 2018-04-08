@@ -10,10 +10,9 @@ import {
   SymbolInformation
 } from 'vscode-languageserver';
 
-import { documentSymbol } from "./features/documentSymbol"
-import { validateTextDocument } from "./features/validateTextDocument"
+import { Parser } from "./lib/Parser"
+import { SymbolIndex } from "./lib/SymbolIndex"
 import { readFileByURI } from "./utils/fileReader"
-import { SymbolIndex } from "./SymbolIndex"
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
 let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -28,9 +27,11 @@ documents.listen(connection);
 // After the server has started the client sends an initilize request. The server receives
 // in the passed params the rootPath of the workspace plus the client capabilites.
 let symbolIndex: SymbolIndex;
+let documentParser: Parser;
 
 connection.onInitialize((_): InitializeResult => {
   symbolIndex = new SymbolIndex()
+  documentParser = new Parser()
 
   return {
     capabilities: {
@@ -50,7 +51,7 @@ connection.onRequest('custom/indexFiles', (params) => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-  const diagnostics = validateTextDocument(change.document.getText())
+  const diagnostics = documentParser.validateSource(change.document.getText())
   connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
 });
 
@@ -65,7 +66,7 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 connection.onDocumentSymbol(params => {
   if (/file:\/\//.test(params.textDocument.uri)) {
     const src = readFileByURI(params.textDocument.uri)
-    return documentSymbol(src)
+    return documentParser.getSymbolsFromSource(src)
   } else {
     // TODO: find a way to get content of Untitled tab
     return []

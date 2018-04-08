@@ -1,4 +1,4 @@
-import { validateTextDocument } from '../../../src/features/validateTextDocument';
+import { Parser } from '../../../src/lib/Parser';
 import { DiagnosticSeverity, Diagnostic } from "vscode-languageserver";
 import { expect } from 'chai';
 import 'mocha';
@@ -6,7 +6,8 @@ import 'mocha';
 describe('validateTextDocument()', () => {
   it('returns no diagnostic when no error', () => {
     const src = "class Annoymous"
-    expect(validateTextDocument(src)).to.be.empty
+    const parser = new Parser()
+    expect(parser.validateSource(src)).to.be.empty
   })
 
   it('returns diagnostics when there are errors', () => {
@@ -18,6 +19,7 @@ describe('validateTextDocument()', () => {
       source: 'coffee'
     }
 
-    expect(validateTextDocument(src)).to.have.deep.members([expected])
+    const parser = new Parser()
+    expect(parser.validateSource(src)).to.have.deep.members([expected])
   })
 })
