@@ -4,6 +4,10 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+const USE_BACKGROUND = true;
+
+import * as path from "path";
+import * as cp from "child_process";
 import * as tmp from 'tmp';
 
 import {
@@ -30,9 +34,10 @@ documents.listen(connection);
 // in the passed params the rootPath of the workspace plus the client capabilites.
 let symbolIndex: SymbolIndex;
 let documentParser: Parser;
+let dbFilename: string
 
 connection.onInitialize((_): InitializeResult => {
-  let dbFilename = tmp.tmpNameSync({ prefix: "coffee-symbols-", postfix: '.loki-db' })
+  dbFilename = tmp.tmpNameSync({ prefix: "coffee-symbols-", postfix: '.json' })
   console.log("Symbols DB:", dbFilename)
   symbolIndex = new SymbolIndex(dbFilename)
   documentParser = new Parser()
@@ -49,7 +54,22 @@ connection.onInitialize((_): InitializeResult => {
 
 connection.onRequest('custom/indexFiles', (params) => {
   console.log('custom/indexFiles')
-  return symbolIndex.indexFiles(params.files)
+  const uris = params.files
+
+  console.log("indexFiles:", uris.length, 'files')
+  console.time("indexFiles")
+
+  if (USE_BACKGROUND) {
+    uris.forEach((uri: string) => {
+      cp.fork(path.join(__dirname, "bin", "indexer"), [ "-d", dbFilename, "-f", uri ])
+    })
+
+    console.timeEnd("indexFiles")
+    return Promise.resolve()
+  } else {
+    return Promise.all(uris.map((uri: string) => symbolIndex.indexFile(uri)))
+      .then(() => console.timeEnd("indexFiles"))
+  }
 })
 
 // The content of a text document has changed. This event is emitted
