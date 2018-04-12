@@ -12,7 +12,7 @@ export class SymbolIndex {
   constructor(dbFilename: string) {
     this.dbFilename = dbFilename
     this.parser = new Parser()
-    this.db = new Datastore({ filename: this.dbFilename, autoload: true });
+    this.db = new Datastore({ filename: this.dbFilename });
   }
 
   indexFile(uri: Uri | string): Promise<void[]> {
@@ -26,21 +26,27 @@ export class SymbolIndex {
       fsPath = `file://${path}`
     }
 
+    console.time(`index ${path}`)
     const symbols = this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
 
     return Promise.all(symbols.map((documentSymbol: SymbolInformation) => {
       return this._saveSymbol(documentSymbol, fsPath)
-    }))
+    })).then(() => {
+      console.timeEnd(`index ${path}`)
+      return []
+    })
   }
 
   find(query: string): Promise<SymbolInformation[]> {
     const dbQuery = { '$where': function(this:SymbolInformation) { return this.name.includes(query) } }
 
     return new Promise((resolve, reject) => {
-      this.db.find(dbQuery, (err: Error, docs: SymbolInformation[]) => {
-        if (err) { reject(err) }
+      this.db.loadDatabase(() => {
+        this.db.find(dbQuery, (err: Error, docs: SymbolInformation[]) => {
+          if (err) { reject(err) }
 
-        resolve(docs)
+          resolve(docs)
+        })
       })
     })
   }

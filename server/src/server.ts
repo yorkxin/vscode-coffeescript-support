@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-const USE_BACKGROUND = true;
+const USE_BACKGROUND = false;
 
 import * as path from "path";
 import * as cp from "child_process";
@@ -59,18 +59,48 @@ connection.onRequest('custom/indexFiles', (params) => {
   console.log("indexFiles:", uris.length, 'files')
   console.time("indexFiles")
 
-  if (USE_BACKGROUND) {
-    uris.forEach((uri: string) => {
-      cp.fork(path.join(__dirname, "bin", "indexer"), [ "-d", dbFilename, "-f", uri ])
-    })
+  let indexer
 
-    console.timeEnd("indexFiles")
-    return Promise.resolve()
+  if (USE_BACKGROUND) {
+    console.log('background')
+    indexer = indexFilesInBackground(uris)
   } else {
-    return Promise.all(uris.map((uri: string) => symbolIndex.indexFile(uri)))
-      .then(() => console.timeEnd("indexFiles"))
+    console.log('foreground')
+    indexer = indexFilesInForeground(uris)
   }
+
+  return indexer.then(() => {
+    console.timeEnd("indexFiles")
+  })
 })
+
+function indexFilesInForeground(uris: string[]): Promise<void> {
+  return Promise.all(uris.map((uri: string) => symbolIndex.indexFile(uri))).then(() => { return })
+}
+
+async function indexFilesInBackground(uris: string[]): Promise<void> {
+  const current = uris.pop()
+  return indexSingleFileInBackground(current).then(() => {
+    if (uris.length === 0) {
+      return Promise.resolve();
+    } else {
+      return indexFilesInBackground(uris)
+    }
+  })
+}
+
+function indexSingleFileInBackground(uri: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    console.time(`fork index ${uri}`)
+    const purosesu = cp.fork(path.join(__dirname, "bin", "indexer"), [ "-d", dbFilename, "-f", uri ])
+
+    purosesu.on('exit', (code) => {
+      if (code !== 0) { reject('indexer returned non-zero') }
+      console.timeEnd(`fork index ${uri}`)
+      resolve()
+    })
+  })
+}
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
