@@ -77,9 +77,9 @@ connection.onDocumentSymbol(params => {
   }
 })
 
-connection.onWorkspaceSymbol((params): SymbolInformation[] => {
+connection.onWorkspaceSymbol(async (params): Promise<SymbolInformation[]> => {
   if (params.query.length > 0) {
-    return symbolIndex.find(params.query)
+    return await symbolIndex.find(params.query)
   } else {
     return []
   }

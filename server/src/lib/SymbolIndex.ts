@@ -1,69 +1,61 @@
 import * as fs from "fs";
-import * as Loki from "lokijs";
+import * as Datastore from "nedb";
 import { Parser } from "./Parser"
 import { SymbolInformation } from "vscode-languageserver";
 import Uri from 'vscode-uri'
 
 export class SymbolIndex {
-  dbFileName: string;
-  db: Loki;
-  symbols: Loki.Collection
+  db: Datastore;
+  dbFilename: string
   parser: Parser
 
-  constructor(dbFileName: string) {
-    this.dbFileName = dbFileName
-    this.db = new Loki(this.dbFileName, {
-      autosave: true,
-      persistenceMethod: 'fs'
-    });
-    this.symbols = this.db.addCollection("symbols", {
-      indices: ['nameForSearch']
-    })
+  constructor(dbFilename: string) {
+    this.dbFilename = dbFilename
     this.parser = new Parser()
+    this.db = new Datastore({ filename: this.dbFilename, autoload: true });
   }
 
-  indexFiles(uris: Array<Uri>): Thenable<void> {
-    console.log("indexFiles:", uris.length, 'files')
-    console.time("indexFiles")
-    return Promise.all(uris.map(uri => this.indexFile(uri)))
-      .then(() => console.timeEnd("indexFiles"))
+  indexFile(uri: Uri | string): Promise<void[]> {
+    let path: string, fsPath: string
+
+    if (uri instanceof Uri) {
+      path = uri.path
+      fsPath = uri.fsPath
+    } else if (typeof uri === 'string') {
+      path = uri
+      fsPath = `file://${path}`
+    }
+
+    const symbols = this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
+
+    return Promise.all(symbols.map((documentSymbol: SymbolInformation) => {
+      return this._saveSymbol(documentSymbol, fsPath)
+    }))
   }
 
-  indexFile(uri: Uri | string): Thenable<void> {
-    return new Promise((resolve) => {
-      let path: string, fsPath: string
+  find(query: string): Promise<SymbolInformation[]> {
+    const dbQuery = { '$where': function(this:SymbolInformation) { return this.name.includes(query) } }
 
-      if (uri instanceof Uri) {
-        path = uri.path
-        fsPath = uri.fsPath
-      } else if (typeof uri === 'string') {
-        path = uri
-        fsPath = `file://${path}`
-      }
+    return new Promise((resolve, reject) => {
+      this.db.find(dbQuery, (err: Error, docs: SymbolInformation[]) => {
+        if (err) { reject(err) }
 
-      const symbols = this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
-
-      symbols.forEach((documentSymbol: SymbolInformation) => {
-        this.symbols.insert({
-          name: documentSymbol.name,
-          nameForSearch: documentSymbol.name.toLocaleLowerCase(),
-          kind: documentSymbol.kind,
-          location: {
-            uri: fsPath,
-            range: documentSymbol.location.range
-          },
-          containerName: documentSymbol.containerName
-        })
+        resolve(docs)
       })
+    })
+  }
 
-      this.db.saveDatabase(() => {
+  _saveSymbol(symbol: SymbolInformation, fsPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.insert(this._serializeSymbol(symbol, fsPath), (err) => {
+        if (err) { reject(err) }
         resolve()
       })
     })
   }
 
-  find(query: string) {
-    return this.symbols.find({ nameForSearch: { '$contains': query }})
-      .map((doc: SymbolInformation) => SymbolInformation.create(doc.name, doc.kind, doc.location.range, doc.location.uri, doc.containerName))
+  _serializeSymbol(symbol: SymbolInformation, fsPath: string) {
+    symbol.location.uri = fsPath
+    return symbol;
   }
 }

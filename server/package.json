@@ -14,7 +14,7 @@
   "dependencies": {
     "coffeescript": "^2.1.0",
     "commander": "^2.15.1",
-    "lokijs": "^1.5.1",
+    "nedb": "^1.8.0",
     "tmp": "0.0.33",
     "vscode-languageserver": "^3.4.2"
   },
@@ -26,11 +26,9 @@
   },
   "devDependencies": {
     "@types/chai": "^4.0.4",
-    "@types/glob": "^5.0.34",
-    "@types/lokijs": "^1.5.0",
     "@types/mocha": "^2.2.44",
+    "@types/nedb": "^1.8.5",
     "@types/node": "^9.6.4",
-    "@types/nodegit": "^0.18.5",
     "@types/tmp": "0.0.33",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
