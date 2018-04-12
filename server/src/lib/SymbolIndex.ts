@@ -12,10 +12,10 @@ export class SymbolIndex {
   constructor(dbFilename: string) {
     this.dbFilename = dbFilename
     this.parser = new Parser()
-    this.db = new Datastore({ filename: this.dbFilename });
+    this.db = new Datastore({ filename: this.dbFilename, autoload: true });
   }
 
-  indexFile(uri: Uri | string): Promise<void[]> {
+  indexFile(uri: Uri | string): Promise<void> {
     let path: string, fsPath: string
 
     if (uri instanceof Uri) {
@@ -26,14 +26,15 @@ export class SymbolIndex {
       fsPath = `file://${path}`
     }
 
-    console.time(`index ${path}`)
-    const symbols = this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
+    console.time(`parse ${path}`)
+    const symbols = this.parser
+      .getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
+      .map(symbol => this._serializeSymbol(symbol, fsPath))
+    console.timeEnd(`parse ${path}`)
 
-    return Promise.all(symbols.map((documentSymbol: SymbolInformation) => {
-      return this._saveSymbol(documentSymbol, fsPath)
-    })).then(() => {
-      console.timeEnd(`index ${path}`)
-      return []
+    console.time(`addIndex ${path}`)
+    return this._saveSymbols(symbols).then(() => {
+      console.timeEnd(`addIndex ${path}`)
     })
   }
 
@@ -44,16 +45,15 @@ export class SymbolIndex {
       this.db.loadDatabase(() => {
         this.db.find(dbQuery, (err: Error, docs: SymbolInformation[]) => {
           if (err) { reject(err) }
-
           resolve(docs)
         })
       })
     })
   }
 
-  _saveSymbol(symbol: SymbolInformation, fsPath: string): Promise<void> {
+  _saveSymbols(symbols: SymbolInformation[]): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.db.insert(this._serializeSymbol(symbol, fsPath), (err) => {
+      this.db.insert(symbols, (err) => {
         if (err) { reject(err) }
         resolve()
       })

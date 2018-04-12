@@ -74,12 +74,12 @@ connection.onRequest('custom/indexFiles', (params) => {
   })
 })
 
-function indexFilesInForeground(uris: string[]): Promise<void> {
-  return Promise.all(uris.map((uri: string) => symbolIndex.indexFile(uri))).then(() => { return })
+function indexFilesInForeground(uris: string[]): Promise<any> {
+  return Promise.all(uris.map((uri: string) => symbolIndex.indexFile(uri)))
 }
 
-async function indexFilesInBackground(uris: string[]): Promise<void> {
-  const current = uris.pop()
+async function indexFilesInBackground(uris: string[]): Promise<any> {
+  const current = uris.shift()
   return indexSingleFileInBackground(current).then(() => {
     if (uris.length === 0) {
       return Promise.resolve();
