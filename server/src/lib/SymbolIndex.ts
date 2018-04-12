@@ -12,7 +12,7 @@ export class SymbolIndex {
   constructor() {
     this.db = new Loki("");
     this.symbols = this.db.addCollection("symbols", {
-      indices: ['name']
+      indices: ['nameForSearch']
     })
     this.parser = new Parser()
   }
@@ -39,6 +39,7 @@ export class SymbolIndex {
       this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8')).forEach((documentSymbol) => {
         this.symbols.insert({
           name: documentSymbol.name,
+          nameForSearch: documentSymbol.name.toLocaleLowerCase(),
           kind: documentSymbol.kind,
           location: {
             uri: fsPath,
@@ -53,8 +54,7 @@ export class SymbolIndex {
   }
 
   find(query: string) {
-    const pattern = new RegExp(`${query}`, 'i')
-    return this.symbols.find({ name: { '$regex': pattern }})
+    return this.symbols.find({ nameForSearch: { '$contains': query }})
       .map((doc: SymbolInformation) => SymbolInformation.create(doc.name, doc.kind, doc.location.range, doc.location.uri, doc.containerName))
   }
 }
