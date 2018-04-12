@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-const USE_BACKGROUND = false;
+const USE_BACKGROUND = true;
 
 import * as path from "path";
 import * as cp from "child_process";
@@ -79,26 +79,30 @@ function indexFilesInForeground(uris: string[]): Promise<any> {
 }
 
 async function indexFilesInBackground(uris: string[]): Promise<any> {
-  const current = uris.shift()
-  return indexSingleFileInBackground(current).then(() => {
-    if (uris.length === 0) {
-      return Promise.resolve();
-    } else {
-      return indexFilesInBackground(uris)
-    }
-  })
-}
+  const purosesu = cp.fork(path.join(__dirname, "bin", "indexer"), [ "-d", dbFilename], { silent: true })
 
-function indexSingleFileInBackground(uri: string): Promise<void> {
+  purosesu.stdout.pipe(process.stdout)
+  purosesu.stderr.pipe(process.stderr)
+
+  purosesu.send({ files: uris })
+
   return new Promise((resolve, reject) => {
-    console.time(`fork index ${uri}`)
-    const purosesu = cp.fork(path.join(__dirname, "bin", "indexer"), [ "-d", dbFilename, "-f", uri ])
+    purosesu.on('message', (params) => {
+      if (params.done) {
+        purosesu.kill()
+        resolve()
+      }
+    })
 
     purosesu.on('exit', (code) => {
       if (code !== 0) { reject('indexer returned non-zero') }
-      console.timeEnd(`fork index ${uri}`)
       resolve()
     })
+
+    purosesu.on('uncaughtException', (err) => {
+      console.error(err.stack);
+      reject(err);
+    });
   })
 }
 
