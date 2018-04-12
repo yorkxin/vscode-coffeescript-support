@@ -17,7 +17,8 @@
   ],
   "icon": "assets/icon.png",
   "activationEvents": [
-    "onLanguage:coffeescript"
+    "onLanguage:coffeescript",
+    "workspaceContains:**/*.coffee"
   ],
   "main": "./out/src/extension",
   "contributes": {},
