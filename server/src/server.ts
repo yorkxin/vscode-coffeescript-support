@@ -4,6 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import * as tmp from 'tmp';
+
 import {
   IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
   InitializeResult,
@@ -30,7 +32,9 @@ let symbolIndex: SymbolIndex;
 let documentParser: Parser;
 
 connection.onInitialize((_): InitializeResult => {
-  symbolIndex = new SymbolIndex()
+  let dbFilename = tmp.tmpNameSync({ prefix: "coffee-symbols-", postfix: '.loki-db' })
+  console.log("Symbols DB:", dbFilename)
+  symbolIndex = new SymbolIndex(dbFilename)
   documentParser = new Parser()
 
   return {

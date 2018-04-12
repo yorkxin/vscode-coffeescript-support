@@ -5,12 +5,17 @@ import { SymbolInformation } from "vscode-languageserver";
 import Uri from 'vscode-uri'
 
 export class SymbolIndex {
+  dbFileName: string;
   db: Loki;
   symbols: Loki.Collection
   parser: Parser
 
-  constructor() {
-    this.db = new Loki("");
+  constructor(dbFileName: string) {
+    this.dbFileName = dbFileName
+    this.db = new Loki(this.dbFileName, {
+      autosave: true,
+      persistenceMethod: 'fs'
+    });
     this.symbols = this.db.addCollection("symbols", {
       indices: ['nameForSearch']
     })
@@ -36,7 +41,9 @@ export class SymbolIndex {
         fsPath = `file://${path}`
       }
 
-      this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8')).forEach((documentSymbol) => {
+      const symbols = this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
+
+      symbols.forEach((documentSymbol: SymbolInformation) => {
         this.symbols.insert({
           name: documentSymbol.name,
           nameForSearch: documentSymbol.name.toLocaleLowerCase(),
@@ -49,7 +56,9 @@ export class SymbolIndex {
         })
       })
 
-      resolve()
+      this.db.saveDatabase(() => {
+        resolve()
+      })
     })
   }
 

@@ -12,6 +12,9 @@
     "outDir": "../client/server",
     "typeRoots": [
       "./@types"
+    ],
+    "types": [
+      "node"
     ]
   },
   "exclude": [
