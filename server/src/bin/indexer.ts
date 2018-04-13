@@ -1,3 +1,4 @@
+import * as readline from 'readline';
 import * as program from "commander";
 import { SymbolIndex } from "../lib/SymbolIndex"
 
@@ -12,11 +13,14 @@ if (!program.db) {
 
 const symbolIndex = new SymbolIndex(program.db)
 
-process.stdin.setEncoding('utf-8')
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
+});
 
-process.stdin.on('data', (data) => {
-  const filename = data.toString().replace(/\n/, '')
-  symbolIndex.indexFile(filename)
+rl.on('line', (line) => {
+  symbolIndex.indexFile(line)
 })
 
 process.on('message', (params) => {
