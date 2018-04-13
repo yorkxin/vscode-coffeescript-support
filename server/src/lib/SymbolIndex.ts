@@ -27,15 +27,12 @@ export class SymbolIndex {
     }
 
     console.time(`parse ${path}`)
-    const symbols = this.parser
-      .getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
-      .map(symbol => this._serializeSymbol(symbol, fsPath))
+
+    const symbols = this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
+
     console.timeEnd(`parse ${path}`)
 
-    console.time(`addIndex ${path}`)
-    return this._saveSymbols(symbols).then(() => {
-      console.timeEnd(`addIndex ${path}`)
-    })
+    return this._saveSymbols(symbols, fsPath)
   }
 
   find(query: string): Promise<SymbolInformation[]> {
@@ -51,9 +48,13 @@ export class SymbolIndex {
     })
   }
 
-  _saveSymbols(symbols: SymbolInformation[]): Promise<void> {
+  _saveSymbols(symbols: SymbolInformation[], fsPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
+      console.time(`addIndex ${fsPath}`)
+      symbols = symbols.map(symbol => this._serializeSymbol(symbol, fsPath))
+
       this.db.insert(symbols, (err) => {
+        console.timeEnd(`addIndex ${fsPath}`)
         if (err) { reject(err) }
         resolve()
       })
