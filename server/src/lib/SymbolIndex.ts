@@ -4,6 +4,12 @@ import { Parser } from "./Parser"
 import { SymbolInformation } from "vscode-languageserver";
 import Uri from 'vscode-uri'
 
+interface SymbolInformationEntry {
+  searchableName: string;
+  locationDescriptor: string;
+  symbolInformation: SymbolInformation;
+}
+
 export class SymbolIndex {
   db: Datastore;
   dbFilename: string
@@ -32,18 +38,24 @@ export class SymbolIndex {
 
     console.timeEnd(`parse ${path}`)
 
+    symbols.forEach(symbol => {
+      symbol.location.uri = fsPath
+    })
+
     return this._saveSymbols(symbols, fsPath)
   }
 
   find(query: string): Promise<SymbolInformation[]> {
-    const dbQuery = { '$where': function(this:SymbolInformation) { return this.name.includes(query) } }
+    const dbQuery = { '$where': function(this: SymbolInformationEntry) { return this.searchableName.includes(query) } }
 
     return new Promise((resolve, reject) => {
       this.db.loadDatabase(() => {
-        this.db.find(dbQuery, (err: Error, docs: SymbolInformation[]) => {
-          if (err) { reject(err) }
-          resolve(docs)
-        })
+        // TODO: should we sort?
+        this.db.find(dbQuery)
+          .exec((err: Error, docs: SymbolInformationEntry[]) => {
+            if (err) { reject(err) }
+            resolve(docs.map(entry => entry.symbolInformation))
+          })
       })
     })
   }
@@ -51,9 +63,9 @@ export class SymbolIndex {
   _saveSymbols(symbols: SymbolInformation[], fsPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
       console.time(`addIndex ${fsPath}`)
-      symbols = symbols.map(symbol => this._serializeSymbol(symbol, fsPath))
+      const symbolEntries = symbols.map(symbol => this._serializeSymbol(symbol))
 
-      this.db.insert(symbols, (err) => {
+      this.db.insert(symbolEntries, (err) => {
         console.timeEnd(`addIndex ${fsPath}`)
         if (err) { reject(err) }
         resolve()
@@ -61,8 +73,19 @@ export class SymbolIndex {
     })
   }
 
-  _serializeSymbol(symbol: SymbolInformation, fsPath: string) {
-    symbol.location.uri = fsPath
-    return symbol;
+  _serializeSymbol(symbolInformation: SymbolInformation): SymbolInformationEntry {
+    const locationDescriptor = [
+      symbolInformation.location.uri,
+      symbolInformation.location.range.start.line,
+      symbolInformation.location.range.start.character
+    ].join(':');
+
+    const searchableName = symbolInformation.name.toLowerCase();
+
+    return {
+      locationDescriptor,
+      searchableName,
+      symbolInformation
+    };
   }
 }

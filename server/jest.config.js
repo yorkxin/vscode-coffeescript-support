@@ -1,17 +1,12 @@
 module.exports = {
-  "transform": {
+  transform: {
     "^.+\\.ts$": "ts-jest"
   },
-  "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.(js|ts)$",
-  "moduleFileExtensions": [
+  testRegex: "(/test/.*|(\\.|/)(test|spec))\\.(js|ts)$",
+  moduleFileExtensions: [
     "ts",
     "js",
     "json",
     "node"
-  ],
-  "globals": {
-    "ts-test": {
-      "skipBabel": true
-    }
-  }
+  ]
 }

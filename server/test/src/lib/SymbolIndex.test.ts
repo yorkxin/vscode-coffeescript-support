@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { SymbolKind } from 'vscode-languageserver';
 import * as tmp from 'tmp';
+import { SymbolKind, SymbolInformation } from 'vscode-languageserver';
 
 import { SymbolIndex } from '../../../src/lib/SymbolIndex';
 
@@ -13,7 +13,7 @@ describe('SymbolIndex()', () => {
   }
 
   function cleanupIndex (index: SymbolIndex) {
-    fs.unlinkSync(index.dbFilename);
+    // fs.unlinkSync(index.dbFilename);
   }
 
   beforeEach(() => {
@@ -26,7 +26,7 @@ describe('SymbolIndex()', () => {
 
   describe('#indexFile()', () => {
     test('works', async () => {
-      const index: SymbolIndex = this.index;
+      const index = this.index;
       await expect(Promise.all([
         index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee')),
         index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee'))
@@ -36,7 +36,7 @@ describe('SymbolIndex()', () => {
 
   describe('#find()', () => {
     test('returns a list of SymbolIndex containing symbols', async () => {
-      const index: SymbolIndex = this.index;
+      const index = this.index;
 
       await Promise.all([
         index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee')),
@@ -47,12 +47,57 @@ describe('SymbolIndex()', () => {
 
       const returned = await index.find('bar')
 
-      expect(returned).toHaveLength(1);
-      expect(returned[0].name).toEqual('exports.bar');
-      expect(returned[0].kind).toEqual(SymbolKind.Namespace);
-      expect(returned[0].location.range).toEqual({ "start": { "character": 0, "line": 87 }, "end": { "character": 23, "line": 87 } })
-      expect(returned[0].location.uri).toEqual("file://" + path.resolve(__dirname, '../../fixtures/sample.coffee'))
-      expect(returned[0].containerName).toBeUndefined()
+      expect(returned).toHaveLength(5);
+
+      expect(returned).toContainEqual({
+        name: 'Bar',
+        kind: SymbolKind.Variable,
+        location: {
+          range: { start: { line: 2, character: 0 }, end: { line: 2, character: 10 } },
+          uri: "file://" + path.resolve(__dirname, '../../fixtures/export-1.coffee')
+        },
+        containerName: undefined
+      })
+
+      expect(returned).toContainEqual({
+        name: 'module.exports.Bar',
+        kind: SymbolKind.Variable,
+        location: {
+          range: { start: { line: 7, character: 0 }, end: { line: 7, character: 23 } },
+          uri: "file://" + path.resolve(__dirname, '../../fixtures/export-1.coffee'),
+        },
+        containerName: undefined
+      })
+
+      expect(returned).toContainEqual({
+        name: 'Bar',
+        kind: SymbolKind.Variable,
+        location: {
+          range: { start: { line: 1, character: 0 }, end: { line: 1, character: 10 } },
+          uri: "file://" + path.resolve(__dirname, '../../fixtures/globals.coffee'),
+        },
+        containerName: undefined
+      })
+
+      expect(returned).toContainEqual({
+        name: 'BAR',
+        kind: SymbolKind.Variable,
+        location: {
+          range: { start: { line: 14, character: 2 }, end: { line: 14, character: 12 } },
+          uri: "file://" + path.resolve(__dirname, '../../fixtures/sample.coffee'),
+        },
+        containerName: 'App',
+      })
+
+      expect(returned).toContainEqual({
+        name: 'exports.bar',
+        kind: SymbolKind.Namespace,
+        location: {
+          range: { start: { line: 87, character: 0 }, end: { line: 87, character: 23 } },
+          uri: "file://" + path.resolve(__dirname, '../../fixtures/sample.coffee'),
+        },
+        containerName: undefined
+      })
     });
   });
 })
