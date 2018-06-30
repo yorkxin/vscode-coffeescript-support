@@ -14,7 +14,8 @@
       "./@types"
     ],
     "types": [
-      "node"
+      "node",
+      "jest"
     ]
   },
   "exclude": [
