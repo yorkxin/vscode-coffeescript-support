@@ -38,12 +38,10 @@ describe('SymbolIndex()', () => {
     test('returns a list of SymbolIndex containing symbols', async () => {
       const index = this.index;
 
-      await Promise.all([
-        index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee')),
-        index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee')),
-        index.indexFile(path.resolve(__dirname, '../../fixtures/export-1.coffee')),
-        index.indexFile(path.resolve(__dirname, '../../fixtures/export-2.coffee')),
-      ])
+      await index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee'));
+      await index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee'));
+      await index.indexFile(path.resolve(__dirname, '../../fixtures/export-1.coffee'));
+      await index.indexFile(path.resolve(__dirname, '../../fixtures/export-2.coffee'));
 
       const returned = await index.find('bar')
 
