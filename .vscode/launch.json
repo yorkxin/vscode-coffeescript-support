@@ -28,6 +28,26 @@
 			],
 			"protocol": "legacy",
 			"preLaunchTask": "watch:server"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Jest All Server",
+			"cwd": "${workspaceFolder}/server",
+			"program": "${workspaceFolder}/server/node_modules/.bin/jest",
+			"args": ["--runInBand", "-c", "${workspaceFolder}/server/jest.config.js"],
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Jest Current File Server",
+			"cwd": "${workspaceFolder}/server",
+			"program": "${workspaceFolder}/server/node_modules/.bin/jest",
+			"args": ["-c", "${workspaceFolder}/server/jest.config.js", "${relativeFile}"],
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen"
 		}
 	]
 }
