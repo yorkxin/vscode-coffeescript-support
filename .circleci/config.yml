@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: circleci/node:6
 
-    working_directory: ~/repo
+    working_directory: ~/vscode-coffeescript-support
 
     steps:
       - checkout
@@ -23,6 +23,6 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
-      - run: npm test
+      - run: cd server && npm test
+      # - run: cd client && npm test
 
