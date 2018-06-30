@@ -13,7 +13,7 @@ describe('SymbolIndex()', () => {
   }
 
   function cleanupIndex (index: SymbolIndex) {
-    // fs.unlinkSync(index.dbFilename);
+    fs.unlinkSync(index.dbFilename);
   }
 
   beforeEach(() => {
