@@ -45,17 +45,7 @@ describe('SymbolIndex()', () => {
 
       const returned = await index.find('bar')
 
-      expect(returned).toHaveLength(5);
-
-      expect(returned).toContainEqual({
-        name: 'Bar',
-        kind: SymbolKind.Variable,
-        location: {
-          range: { start: { line: 2, character: 0 }, end: { line: 2, character: 10 } },
-          uri: "file://" + path.resolve(__dirname, '../../fixtures/export-1.coffee')
-        },
-        containerName: undefined
-      })
+      expect(returned).toHaveLength(3);
 
       expect(returned).toContainEqual({
         name: 'module.exports.Bar',
@@ -75,16 +65,6 @@ describe('SymbolIndex()', () => {
           uri: "file://" + path.resolve(__dirname, '../../fixtures/globals.coffee'),
         },
         containerName: undefined
-      })
-
-      expect(returned).toContainEqual({
-        name: 'BAR',
-        kind: SymbolKind.Variable,
-        location: {
-          range: { start: { line: 14, character: 2 }, end: { line: 14, character: 12 } },
-          uri: "file://" + path.resolve(__dirname, '../../fixtures/sample.coffee'),
-        },
-        containerName: 'App',
       })
 
       expect(returned).toContainEqual({

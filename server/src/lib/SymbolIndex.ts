@@ -34,7 +34,7 @@ export class SymbolIndex {
 
     console.time(`parse ${path}`)
 
-    const symbols = this.parser.getSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
+    const symbols = this.parser.getExportedSymbolsFromSource(fs.readFileSync(path, 'utf-8'))
 
     console.timeEnd(`parse ${path}`)
 
