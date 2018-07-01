@@ -9,9 +9,6 @@ interface SymbolMetadata {
 }
 
 export class Parser {
-  constructor() {
-  }
-
   validateSource(src: string): Diagnostic[]  {
     try {
       this._parse(src)
@@ -41,6 +38,23 @@ export class Parser {
   getSymbolsFromSource(src: string): SymbolInformation[] {
     try {
       return this.getSymbolsFromBlock(this._parse(src))
+    } catch {
+      return []
+    }
+  }
+
+  getExportedSymbolsFromSource(src: string): SymbolInformation[] {
+    try {
+      const symbols = this.getSymbolsFromBlock(this._parse(src));
+
+      const moduleExports = symbols.filter(symbol => symbol.name.match(/^(module\.)?exports(\..+)?$/))
+
+      if (moduleExports.length !== 0) {
+        return moduleExports;
+      } else {
+        // No exports. Assume global variables (tranditional web app).
+        return symbols;
+      }
     } catch {
       return []
     }

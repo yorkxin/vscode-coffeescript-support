@@ -26,21 +26,94 @@ describe('Parser', () => {
   })
 
   describe('getSymbolsFromSource()', () => {
-    test('returns all symbols including those in closure', () => {
+    test('works for named export', () => {
       const parser = new Parser()
       const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-1.coffee')).toString();
       const symbols = parser.getSymbolsFromSource(src)
 
       expect(symbols).toEqual([
-        { name: 'Foo', kind: SymbolKind.Class, location: { range: { start: { line: 0, character: 0 }, end: { line: 0, character: 8 } }, uri: null } },
-        { name: 'Bar', kind: SymbolKind.Variable, location: { range: { start: { line: 2, character: 0 }, end: { line: 2, character: 10 } }, uri: null } },
-        { name: 'Baz', kind: SymbolKind.Variable, location: { range: { start: { line: 4, character: 0 }, end: { line: 4, character: 8 } }, uri: null } },
-        { name: 'module.exports.Foo', kind: SymbolKind.Variable, location: { range: { start: { line: 6, character: 0 }, end: { line: 6, character: 23 } }, uri: null } },
-        { name: 'module.exports.Bar', kind: SymbolKind.Variable, location: { range: { start: { line: 7, character: 0 }, end: { line: 7, character: 23 } }, uri: null } },
+        { name: 'Foo', kind: SymbolKind.Class, location: expect.anything() },
+        { name: 'Bar', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'Baz', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Foo', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Bar', kind: SymbolKind.Variable, location: expect.anything() },
       ])
     })
 
-    test.skip('returns only global symbols if asked', () => {
+    test('works for default export', () => {
+      const parser = new Parser()
+      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-2.coffee')).toString();
+      const symbols = parser.getSymbolsFromSource(src)
+
+      expect(symbols).toEqual([
+        { name: 'Foo', kind: SymbolKind.Variable, location: expect.anything() },
+        // FIXME: module.exports should be Class
+        { name: 'module.exports', kind: SymbolKind.Variable, location: expect.anything() },
+      ])
+    })
+
+    test('works for global variables', () => {
+      const parser = new Parser()
+      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/globals.coffee')).toString();
+      const symbols = parser.getSymbolsFromSource(src)
+
+      expect(symbols).toEqual([
+        { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "Bar", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "Baz()", kind: SymbolKind.Function, location: expect.anything() },
+        { name: "Hogehoge", kind: SymbolKind.Variable, location: expect.anything() },
+      ])
     })
   });
+
+  describe('getExportedSymbolsFromSource()', () => {
+    test('works for named export', () => {
+      const parser = new Parser()
+      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-1.coffee')).toString();
+      const symbols = parser.getExportedSymbolsFromSource(src)
+
+      expect(symbols).toEqual([
+        { name: 'module.exports.Foo', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Bar', kind: SymbolKind.Variable, location: expect.anything() },
+      ])
+    })
+
+    test('works for default export', () => {
+      const parser = new Parser()
+      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-2.coffee')).toString();
+      const symbols = parser.getExportedSymbolsFromSource(src)
+
+      expect(symbols).toEqual([
+        // FIXME: module.exports should be Class
+        { name: 'module.exports', kind: SymbolKind.Variable, location: expect.anything() },
+      ])
+    })
+
+    test('works for global variables', () => {
+      const parser = new Parser()
+      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/globals.coffee')).toString();
+      const symbols = parser.getExportedSymbolsFromSource(src)
+
+      expect(symbols).toEqual([
+        { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "Bar", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "Baz()", kind: SymbolKind.Function, location: expect.anything() },
+        { name: "Hogehoge", kind: SymbolKind.Variable, location: expect.anything() },
+      ])
+    })
+
+    test('works for a complex sample file', () => {
+      const parser = new Parser()
+      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/sample.coffee')).toString();
+      const symbols = parser.getExportedSymbolsFromSource(src)
+
+      expect(symbols).toEqual([
+        { name: "module.exports", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "module.exports.KONSTANT", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "exports.abc", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "exports.foo", kind: SymbolKind.Namespace, location: expect.anything() },
+        { name: "exports.bar", kind: SymbolKind.Namespace, location: expect.anything() },
+      ])
+    })
+  })
 });
