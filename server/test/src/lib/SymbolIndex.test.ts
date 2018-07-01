@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as tmp from 'tmp';
-import { SymbolKind, SymbolInformation } from 'vscode-languageserver';
+import { SymbolKind } from 'vscode-languageserver';
 
 import { SymbolIndex } from '../../../src/lib/SymbolIndex';
 

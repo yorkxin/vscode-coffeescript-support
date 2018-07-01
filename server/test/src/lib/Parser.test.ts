@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Parser } from '../../../src/lib/Parser';
-import { DiagnosticSeverity, Diagnostic, SymbolKind, SymbolInformation } from "vscode-languageserver/lib/main";
+import { DiagnosticSeverity, Diagnostic, SymbolKind } from "vscode-languageserver/lib/main";
 
 describe('Parser', () => {
   describe('validateSource()', () => {
