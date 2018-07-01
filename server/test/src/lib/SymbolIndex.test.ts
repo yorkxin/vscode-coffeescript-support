@@ -35,7 +35,7 @@ describe('SymbolIndex()', () => {
   });
 
   describe('#find()', () => {
-    async function prepareIndex(index) {
+    async function prepareIndex(index: SymbolIndex) {
       await index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee'));
       await index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee'));
       await index.indexFile(path.resolve(__dirname, '../../fixtures/export-1.coffee'));
