@@ -60,7 +60,7 @@ export class Parser {
       className = "(Anonymous Class)"
     }
 
-    symbolInformation.push(SymbolInformation.create(className, SymbolKind.Class, _createRange(classNode.locationData)))
+    symbolInformation.push(SymbolInformation.create(className, SymbolKind.Class, _createRange(classNode.locationData), null))
 
     if (classNode.body instanceof Nodes.Block) {
       symbolInformation = symbolInformation.concat(this.getSymbolsFromBlock(classNode.body, { name: className, kind: SymbolKind.Class }))

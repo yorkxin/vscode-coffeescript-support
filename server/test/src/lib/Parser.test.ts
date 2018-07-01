@@ -1,5 +1,7 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import { Parser } from '../../../src/lib/Parser';
-import { DiagnosticSeverity, Diagnostic } from "vscode-languageserver/lib/main";
+import { DiagnosticSeverity, Diagnostic, SymbolKind, SymbolInformation } from "vscode-languageserver/lib/main";
 
 describe('Parser', () => {
   describe('validateSource()', () => {
@@ -24,7 +26,18 @@ describe('Parser', () => {
   })
 
   describe('getSymbolsFromSource()', () => {
-    test.skip('returns all symbols including those in closure', () => {
+    test('returns all symbols including those in closure', () => {
+      const parser = new Parser()
+      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-1.coffee')).toString();
+      const symbols = parser.getSymbolsFromSource(src)
+
+      expect(symbols).toEqual([
+        { name: 'Foo', kind: SymbolKind.Class, location: { range: { start: { line: 0, character: 0 }, end: { line: 0, character: 8 } }, uri: null } },
+        { name: 'Bar', kind: SymbolKind.Variable, location: { range: { start: { line: 2, character: 0 }, end: { line: 2, character: 10 } }, uri: null } },
+        { name: 'Baz', kind: SymbolKind.Variable, location: { range: { start: { line: 4, character: 0 }, end: { line: 4, character: 8 } }, uri: null } },
+        { name: 'module.exports.Foo', kind: SymbolKind.Variable, location: { range: { start: { line: 6, character: 0 }, end: { line: 6, character: 23 } }, uri: null } },
+        { name: 'module.exports.Bar', kind: SymbolKind.Variable, location: { range: { start: { line: 7, character: 0 }, end: { line: 7, character: 23 } }, uri: null } },
+      ])
     })
 
     test.skip('returns only global symbols if asked', () => {
