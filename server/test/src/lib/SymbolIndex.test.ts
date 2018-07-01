@@ -35,47 +35,58 @@ describe('SymbolIndex()', () => {
   });
 
   describe('#find()', () => {
-    test('returns a list of SymbolIndex containing symbols', async () => {
-      const index = this.index;
-
+    async function prepareIndex(index) {
       await index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee'));
       await index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee'));
       await index.indexFile(path.resolve(__dirname, '../../fixtures/export-1.coffee'));
       await index.indexFile(path.resolve(__dirname, '../../fixtures/export-2.coffee'));
 
-      const returned = await index.find('bar')
+      return index
+    }
 
-      expect(returned).toHaveLength(3);
+    const expectedResult1 = {
+      name: 'module.exports.Bar',
+      kind: SymbolKind.Variable,
+      location: {
+        range: expect.anything(),
+        uri: "file://" + path.resolve(__dirname, '../../fixtures/export-1.coffee'),
+      },
+    };
 
-      expect(returned).toContainEqual({
-        name: 'module.exports.Bar',
-        kind: SymbolKind.Variable,
-        location: {
-          range: { start: { line: 7, character: 0 }, end: { line: 7, character: 23 } },
-          uri: "file://" + path.resolve(__dirname, '../../fixtures/export-1.coffee'),
-        },
-        containerName: undefined
-      })
+    const expectedResult2 = {
+      name: 'exports.bar',
+      kind: SymbolKind.Namespace,
+      location: {
+        range: expect.anything(),
+        uri: "file://" + path.resolve(__dirname, '../../fixtures/sample.coffee'),
+      },
+    };
 
-      expect(returned).toContainEqual({
-        name: 'Bar',
-        kind: SymbolKind.Variable,
-        location: {
-          range: { start: { line: 1, character: 0 }, end: { line: 1, character: 10 } },
-          uri: "file://" + path.resolve(__dirname, '../../fixtures/globals.coffee'),
-        },
-        containerName: undefined
-      })
+    const expectedResult3 = {
+      name: 'Bar',
+      kind: SymbolKind.Variable,
+      location: {
+        range: expect.anything(),
+        uri: "file://" + path.resolve(__dirname, '../../fixtures/globals.coffee'),
+      },
+    };
 
-      expect(returned).toContainEqual({
-        name: 'exports.bar',
-        kind: SymbolKind.Namespace,
-        location: {
-          range: { start: { line: 87, character: 0 }, end: { line: 87, character: 23 } },
-          uri: "file://" + path.resolve(__dirname, '../../fixtures/sample.coffee'),
-        },
-        containerName: undefined
-      })
+    test('returns a list of SymbolIndex containing symbols', async () => {
+      const index = await prepareIndex(this.index)
+      const results = await index.find('bar');
+
+      expect(results).toContainEqual(expectedResult1)
+      expect(results).toContainEqual(expectedResult2)
+      expect(results).toContainEqual(expectedResult3)
+    });
+
+    test('returns a list of SymbolIndex containing symbols (case insensitive)', async () => {
+      const index = await prepareIndex(this.index)
+      const results = await index.find('BAR');
+
+      expect(results).toContainEqual(expectedResult1)
+      expect(results).toContainEqual(expectedResult2)
+      expect(results).toContainEqual(expectedResult3)
     });
   });
 })

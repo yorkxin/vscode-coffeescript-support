@@ -46,7 +46,12 @@ export class SymbolIndex {
   }
 
   find(query: string): Promise<SymbolInformation[]> {
-    const dbQuery = { '$where': function(this: SymbolInformationEntry) { return this.searchableName.includes(query) } }
+    const queryInLowercase = query.toLowerCase()
+    const dbQuery = {
+      '$where': function(this: SymbolInformationEntry) {
+        return this.searchableName.includes(queryInLowercase)
+      }
+    }
 
     return new Promise((resolve, reject) => {
       this.db.loadDatabase(() => {
@@ -60,7 +65,17 @@ export class SymbolIndex {
     })
   }
 
+  async remove() {
+    return new Promise((resolve, reject) => {
+      fs.unlink(this.dbFilename, (err) => {
+        if (err !== null) { reject(err) };
+        resolve()
+      });
+    })
+  }
+
   _saveSymbols(symbols: SymbolInformation[], fsPath: string): Promise<void> {
+    console.debug("saving", symbols.length, "symbols for", fsPath)
     return new Promise((resolve, reject) => {
       console.time(`addIndex ${fsPath}`)
       const symbolEntries = symbols.map(symbol => this._serializeSymbol(symbol))

@@ -6,8 +6,6 @@
 
 const USE_BACKGROUND = true;
 
-import * as path from "path";
-import * as cp from "child_process";
 import * as tmp from 'tmp';
 
 import {
@@ -17,8 +15,8 @@ import {
 } from 'vscode-languageserver';
 
 import { Parser } from "./lib/Parser"
-import { SymbolIndex } from "./lib/SymbolIndex"
 import { readFileByURI } from "./utils/fileReader"
+import { IndexService } from './lib/IndexService';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
 let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -32,14 +30,13 @@ documents.listen(connection);
 
 // After the server has started the client sends an initilize request. The server receives
 // in the passed params the rootPath of the workspace plus the client capabilites.
-let symbolIndex: SymbolIndex;
+let indexService: IndexService;
 let documentParser: Parser;
 let dbFilename: string
 
 connection.onInitialize((_): InitializeResult => {
   dbFilename = tmp.tmpNameSync({ prefix: "coffee-symbols-", postfix: '.json' })
-  console.log("Symbols DB:", dbFilename)
-  symbolIndex = new SymbolIndex(dbFilename)
+  indexService = new IndexService(dbFilename)
   documentParser = new Parser()
 
   return {
@@ -56,55 +53,22 @@ connection.onRequest('custom/indexFiles', (params) => {
   console.log('custom/indexFiles')
   const uris = params.files
 
-  console.log("indexFiles:", uris.length, 'files')
+  console.debug("indexFiles:", uris.length, 'files')
   console.time("indexFiles")
 
-  let indexer
+  let indexing
 
+  // TODO: make this an extension config
   if (USE_BACKGROUND) {
-    console.log('background')
-    indexer = indexFilesInBackground(uris)
+    indexing = indexService.indexFilesInBackground(uris)
   } else {
-    console.log('foreground')
-    indexer = indexFilesInForeground(uris)
+    indexing = indexService.indexFilesInForeground(uris)
   }
 
-  return indexer.then(() => {
+  return indexing.then(() => {
     console.timeEnd("indexFiles")
   })
 })
-
-function indexFilesInForeground(uris: string[]): Promise<any> {
-  return Promise.all(uris.map((uri: string) => symbolIndex.indexFile(uri)))
-}
-
-async function indexFilesInBackground(uris: string[]): Promise<any> {
-  const purosesu = cp.fork(path.join(__dirname, "bin", "indexer"), [ "-d", dbFilename], { silent: true })
-
-  purosesu.stdout.pipe(process.stdout)
-  purosesu.stderr.pipe(process.stderr)
-
-  purosesu.send({ files: uris })
-
-  return new Promise((resolve, reject) => {
-    purosesu.on('message', (params) => {
-      if (params.done) {
-        purosesu.kill()
-        resolve()
-      }
-    })
-
-    purosesu.on('exit', (code) => {
-      if (code !== 0) { reject('indexer returned non-zero') }
-      resolve()
-    })
-
-    purosesu.on('uncaughtException', (err) => {
-      console.error(err.stack);
-      reject(err);
-    });
-  })
-}
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
@@ -132,11 +96,7 @@ connection.onDocumentSymbol(params => {
 })
 
 connection.onWorkspaceSymbol(async (params): Promise<SymbolInformation[]> => {
-  if (params.query.length > 0) {
-    return await symbolIndex.find(params.query)
-  } else {
-    return []
-  }
+  return indexService.find(params.query)
 })
 
 /*
