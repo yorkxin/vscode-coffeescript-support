@@ -1,4 +1,4 @@
 Foo = 1
 Bar = "Bar"
-Baz = () =>
+Baz = () => x = 1
 Hogehoge = Bar

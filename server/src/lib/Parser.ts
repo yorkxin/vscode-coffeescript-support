@@ -47,13 +47,14 @@ export class Parser {
     try {
       const symbols = this.getSymbolsFromBlock(this._parse(src));
 
-      const moduleExports = symbols.filter(symbol => symbol.name.match(/^(module\.)?exports(\..+)?$/))
+      const symbolsWithoutContainer = symbols.filter(symbol => !symbol.containerName);
+      const moduleExports = symbolsWithoutContainer.filter(symbol => symbol.name.match(/^(module\.)?exports(\..+)?$/))
 
       if (moduleExports.length !== 0) {
         return moduleExports;
       } else {
         // No exports. Assume global variables (tranditional web app).
-        return symbols;
+        return symbolsWithoutContainer;
       }
     } catch {
       return []
