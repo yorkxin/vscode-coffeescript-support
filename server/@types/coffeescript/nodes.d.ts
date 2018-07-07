@@ -1,6 +1,6 @@
 // http://coffeescript.org/annotated-source/nodes.html
-declare module "coffeescript/nodes" {
-  import { Scope } from "coffeescript/scope"
+declare module "coffeescript/lib/coffeescript/nodes" {
+  import { Scope } from "coffeescript/lib/coffeescript/scope"
 
   interface AbstractO {
     index: number,
