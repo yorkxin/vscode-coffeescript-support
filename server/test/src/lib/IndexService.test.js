@@ -1,8 +1,8 @@
-import * as path from 'path';
-import * as fs from 'fs';
-import * as tmp from 'tmp';
+const path = require('path');
+const fs = require('fs');
+const tmp = require('tmp');
 
-import { IndexService } from '../../../src/lib/IndexService';
+const { IndexService } = require('../../../src/lib/IndexService');
 
 describe('IndexService', () => {
   function initService () {
@@ -11,7 +11,11 @@ describe('IndexService', () => {
     return new IndexService(tempura.name);
   }
 
-  function shutdownService (indexService: IndexService) {
+  /**
+   *
+   * @param {IndexService} indexService
+   */
+  function shutdownService (indexService) {
     indexService.shutdown()
   }
 
@@ -25,7 +29,8 @@ describe('IndexService', () => {
 
   describe('#indexFilesInBackground()', () => {
     test('works', async () => {
-      const service: IndexService = this.indexService;
+      /** @type {IndexService} */
+      const service = this.indexService;
 
       const files = [
         path.resolve(__dirname, '../../fixtures/globals.coffee'),
@@ -39,7 +44,8 @@ describe('IndexService', () => {
 
   describe('#find()', () => {
     beforeEach(async () => {
-      const service: IndexService = this.indexService;
+      /** @type {IndexService} */
+      const service = this.indexService;
 
       const files = [
         path.resolve(__dirname, '../../fixtures/globals.coffee'),
@@ -50,14 +56,16 @@ describe('IndexService', () => {
     })
 
     test('calls symbolIndex#find', async () => {
-      const service: IndexService = this.indexService
+      /** @type {IndexService} */
+      const service = this.indexService
       service.symbolIndex.find = jest.fn()
       await service.find("bar")
       expect(service.symbolIndex.find).toHaveBeenCalledWith('bar')
     });
 
     test('does not even calls symbolIndex#find when no input string', async () => {
-      const service: IndexService = this.indexService
+      /** @type {IndexService} */
+      const service = this.indexService
       service.symbolIndex.find = jest.fn()
       await service.find("")
       expect(service.symbolIndex.find).not.toHaveBeenCalled()

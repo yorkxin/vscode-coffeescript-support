@@ -1,7 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { Parser } from '../../../src/lib/Parser';
-import { DiagnosticSeverity, Diagnostic, SymbolKind } from "vscode-languageserver/lib/main";
+const fs = require('fs');
+const path = require('path');
+const { Parser } = require('../../../src/lib/Parser');
+const { DiagnosticSeverity, SymbolKind } = require("vscode-languageserver/lib/main");
 
 describe('Parser', () => {
   describe('validateSource()', () => {
@@ -13,7 +13,7 @@ describe('Parser', () => {
 
     test('returns diagnostics when there are errors', () => {
       const src = "a ="
-      const expected: Diagnostic = {
+      const expected = {
         severity: DiagnosticSeverity.Error,
         range: { start: { line: 0, character: 3 }, end: { line: 0, character: 3 }},
         message: "1:4 unexpected end of input",

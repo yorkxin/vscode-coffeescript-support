@@ -1,9 +1,9 @@
-import * as path from 'path';
-import * as fs from 'fs';
-import * as tmp from 'tmp';
-import { SymbolKind } from 'vscode-languageserver';
+const path = require('path');
+const fs = require('fs');
+const tmp = require('tmp');
+const { SymbolKind } = require('vscode-languageserver');
 
-import { SymbolIndex } from '../../../src/lib/SymbolIndex';
+const { SymbolIndex } = require('../../../src/lib/SymbolIndex');
 
 describe('SymbolIndex()', () => {
   function createIndex () {
@@ -12,7 +12,10 @@ describe('SymbolIndex()', () => {
     return new SymbolIndex(tempura.name);
   }
 
-  function cleanupIndex (index: SymbolIndex) {
+  /**
+   * @param {SymbolIndex} index
+   */
+  function cleanupIndex (index) {
     fs.unlinkSync(index.dbFilename);
   }
 
@@ -35,7 +38,10 @@ describe('SymbolIndex()', () => {
   });
 
   describe('#find()', () => {
-    async function prepareIndex(index: SymbolIndex) {
+    /**
+     * @param {SymbolIndex} index
+     */
+    async function prepareIndex(index) {
       await index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee'));
       await index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee'));
       await index.indexFile(path.resolve(__dirname, '../../fixtures/export-1.coffee'));
