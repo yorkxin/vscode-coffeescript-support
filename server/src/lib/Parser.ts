@@ -1,5 +1,5 @@
 import * as CoffeeScript from 'coffeescript'
-import * as Nodes from 'coffeescript/lib/coffeescript/nodes'
+import * as Nodes from 'coffeescript/nodes'
 
 import { SymbolInformation, SymbolKind, Range, Diagnostic, DiagnosticSeverity } from "vscode-languageserver"
 
