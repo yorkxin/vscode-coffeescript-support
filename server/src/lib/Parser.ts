@@ -38,7 +38,7 @@ export class Parser {
   getSymbolsFromSource(src: string): SymbolInformation[] {
     try {
       return this.getSymbolsFromBlock(this._parse(src))
-    } catch {
+    } catch (_error) {
       return []
     }
   }
@@ -56,7 +56,7 @@ export class Parser {
         // No exports. Assume global variables (tranditional web app).
         return symbolsWithoutContainer;
       }
-    } catch {
+    } catch (_error) {
       return []
     }
   }
