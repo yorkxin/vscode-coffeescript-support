@@ -53,7 +53,7 @@ connection.onRequest('custom/indexFiles', (params) => {
   console.log('custom/indexFiles')
   const uris = params.files
 
-  console.debug("indexFiles:", uris.length, 'files')
+  console.log("indexFiles:", uris.length, 'files')
   console.time("indexFiles")
 
   let indexing

@@ -75,7 +75,7 @@ export class SymbolIndex {
   }
 
   _saveSymbols(symbols: SymbolInformation[], fsPath: string): Promise<void> {
-    console.debug("saving", symbols.length, "symbols for", fsPath)
+    console.log("saving", symbols.length, "symbols for", fsPath)
     return new Promise((resolve, reject) => {
       console.time(`addIndex ${fsPath}`)
       const symbolEntries = symbols.map(symbol => this._serializeSymbol(symbol))

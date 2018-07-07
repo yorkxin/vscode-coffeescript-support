@@ -13,7 +13,7 @@ export class IndexService {
   constructor(dbFilename: string) {
     this.dbFilename = dbFilename
     this.symbolIndex = new SymbolIndex(this.dbFilename)
-    console.debug("Symbols DB:", this.dbFilename)
+    console.log("Symbols DB:", this.dbFilename)
   }
 
   async find(query: string) {
@@ -25,7 +25,7 @@ export class IndexService {
   }
 
   async indexFilesInBackground(uris: string[]): Promise<any> {
-    console.debug(new Date(), 'index with sub processes')
+    console.log(new Date(), 'index with sub processes')
 
     let args: string[] = []
 
@@ -77,7 +77,7 @@ export class IndexService {
   }
 
   async indexFilesInForeground(uris: string[]): Promise<any> {
-    console.debug('index in foreground')
+    console.log('index in foreground')
     return Promise.all(uris.map((uri: string) => this.symbolIndex.indexFile(uri)))
   }
 
