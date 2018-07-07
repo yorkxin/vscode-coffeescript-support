@@ -16,8 +16,8 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: npm install -g typescript
       - run: npm install
+      - run: npm install --no-save typescript
 
       - save_cache:
           paths:
