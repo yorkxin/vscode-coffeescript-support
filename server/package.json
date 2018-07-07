@@ -16,7 +16,7 @@
     "commander": "^2.15.1",
     "nedb": "^1.8.0",
     "tmp": "0.0.33",
-    "vscode-languageserver": "^3.4.2"
+    "vscode-languageserver": "^4.2.1"
   },
   "scripts": {
     "installServer": "installServerIntoExtension ../client ./package.json ./tsconfig.json",
