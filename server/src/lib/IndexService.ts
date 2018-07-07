@@ -1,8 +1,10 @@
 import * as path from "path";
+import * as fs from "fs";
 import * as cp from "child_process";
 import { SymbolIndex } from "./SymbolIndex";
 
-const INDEXER_CLI_PATH = path.resolve(__dirname, "..", "bin", "indexer.ts");
+const INDEXER_CLI_TS_PATH = path.resolve(__dirname, "..", "bin", "indexer.ts");
+const INDEXER_CLI_JS_PATH = path.resolve(__dirname, "..", "bin", "indexer.js");
 
 export class IndexService {
   symbolIndex: SymbolIndex
@@ -25,7 +27,16 @@ export class IndexService {
   async indexFilesInBackground(uris: string[]): Promise<any> {
     console.debug(new Date(), 'index with sub processes')
 
-    const args = ["-r", "ts-node/register", INDEXER_CLI_PATH, "-d", this.dbFilename];
+    let args: string[] = []
+
+    if (fs.existsSync(INDEXER_CLI_JS_PATH)) {
+      args = [INDEXER_CLI_JS_PATH, "-d", this.dbFilename];
+    } else if (fs.existsSync(INDEXER_CLI_TS_PATH)) {
+      args = ["-r", "ts-node/register", INDEXER_CLI_TS_PATH, "-d", this.dbFilename];
+    } else {
+      throw new Error('Indexer does not exist.')
+    }
+
     const proc = cp.spawn('node', args, {
       stdio: ['inherit', 'inherit', 'inherit', 'ipc']
     });
