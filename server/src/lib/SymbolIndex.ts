@@ -42,7 +42,8 @@ export class SymbolIndex {
       symbol.location.uri = fsPath
     })
 
-    return this._saveSymbols(symbols, fsPath)
+    return this._removeSymbolsOfFile(fsPath)
+      .then(() => this._saveSymbols(symbols, fsPath))
   }
 
   find(query: string): Promise<SymbolInformation[]> {
@@ -86,6 +87,22 @@ export class SymbolIndex {
         resolve()
       })
     })
+  }
+
+  _removeSymbolsOfFile(fsPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.remove({ "symbolInformation.location.uri": fsPath }, { multi: true }, (err, numRemoved) => {
+        if (err) {
+          reject(err);
+        }
+
+        if (numRemoved > 0) {
+          console.log('Removed', numRemoved, 'symbols for', fsPath)
+        }
+
+        resolve();
+      });
+    });
   }
 
   _serializeSymbol(symbolInformation: SymbolInformation): SymbolInformationEntry {

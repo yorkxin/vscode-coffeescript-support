@@ -35,6 +35,31 @@ describe('SymbolIndex()', () => {
         index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee'))
       ]))
     });
+
+    test('does not duplicate if index same file twice', async () => {
+      /** @type {SymbolIndex} */
+      const index = this.index;
+      const file = path.resolve(__dirname, '../../fixtures/export-1.coffee');
+
+      /**
+       * @param {any} query
+       */
+      const countPromise = async function(query) {
+        return new Promise((resolve, reject) => {
+          index.db.count(query, (err, num) => {
+            if (err) { reject(err) };
+            resolve(num);
+          });
+        })
+      };
+
+      await index.indexFile(file);
+      const origianlSize = await countPromise({ "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
+      expect(origianlSize).not.toBe(0);
+      await index.indexFile(file)
+      const newSize = await countPromise({ "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
+      expect(newSize).toEqual(origianlSize)
+    });
   });
 
   describe('#find()', () => {
