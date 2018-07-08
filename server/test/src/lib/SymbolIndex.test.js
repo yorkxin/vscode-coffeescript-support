@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const tmp = require('tmp');
 const { SymbolKind } = require('vscode-languageserver');
+const Nedb = require('nedb')
 
 const { SymbolIndex } = require('../../../src/lib/SymbolIndex');
 
