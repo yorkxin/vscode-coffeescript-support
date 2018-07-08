@@ -10,7 +10,7 @@ import { ExtensionContext, workspace } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient';
 
 const DOC_SELECTORS = [
-  { language: 'coffeescript' }
+  { language: 'coffeescript', scheme: 'file' }
 ]
 
 const GLOB_COFFEE_SCRIPT_FILES = "**/*.coffee";
