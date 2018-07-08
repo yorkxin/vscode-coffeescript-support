@@ -70,6 +70,11 @@ connection.onRequest('custom/indexFiles', (params) => {
   })
 })
 
+connection.onRequest('custom/removeFiles', (params) => {
+  console.log('custom/removeFiles')
+  return indexService.removeFiles(params.files)
+})
+
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {

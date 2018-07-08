@@ -19,6 +19,19 @@ describe('SymbolIndex()', () => {
     fs.unlinkSync(index.dbFilename);
   }
 
+  /**
+   * @param {Nedb} db
+   * @param {any} query
+   */
+  async function countPromise(db, query) {
+    return new Promise((resolve, reject) => {
+      db.count(query, (err, num) => {
+        if (err) { reject(err) };
+        resolve(num);
+      });
+    })
+  };
+
   beforeEach(() => {
     this.index = createIndex()
   });
@@ -40,25 +53,38 @@ describe('SymbolIndex()', () => {
       /** @type {SymbolIndex} */
       const index = this.index;
       const file = path.resolve(__dirname, '../../fixtures/export-1.coffee');
-
-      /**
-       * @param {any} query
-       */
-      const countPromise = async function(query) {
-        return new Promise((resolve, reject) => {
-          index.db.count(query, (err, num) => {
-            if (err) { reject(err) };
-            resolve(num);
-          });
-        })
-      };
-
       await index.indexFile(file);
-      const origianlSize = await countPromise({ "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
+      const origianlSize = await countPromise(index.db, { "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
       expect(origianlSize).not.toBe(0);
       await index.indexFile(file)
-      const newSize = await countPromise({ "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
+      const newSize = await countPromise(index.db, { "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
       expect(newSize).toEqual(origianlSize)
+    });
+  });
+
+  describe('#removeFile()', () => {
+    test('does not duplicate if index same file twice', async () => {
+      /** @type {SymbolIndex} */
+      const index = this.index;
+      const file1 = path.resolve(__dirname, '../../fixtures/export-1.coffee');
+      const file2 = path.resolve(__dirname, '../../fixtures/export-2.coffee');
+
+      await index.indexFile(file1);
+      await index.indexFile(file2);
+
+      const countFile1Original = await countPromise(index.db, { "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
+      expect(countFile1Original).not.toBe(0);
+
+      const countFile2 = await countPromise(index.db, { "symbolInformation.location.uri": /fixtures\/export-2\.coffee/ });
+      expect(countFile2).not.toBe(0);
+
+      await index.removeFile(file1);
+
+      const countFile1AfterRemoval = await countPromise(index.db, { "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
+      expect(countFile1AfterRemoval).toEqual(0);
+
+      const countFile2AfterFile1Removal = await countPromise(index.db, { "symbolInformation.location.uri": /fixtures\/export-2\.coffee/ });
+      expect(countFile2AfterFile1Removal).toEqual(countFile2);
     });
   });
 

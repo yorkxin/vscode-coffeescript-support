@@ -81,7 +81,11 @@ export class IndexService {
     return Promise.all(uris.map((uri: string) => this.symbolIndex.indexFile(uri)))
   }
 
+  async removeFiles(uris: string[]) {
+    return Promise.all(uris.map((uri: string) => this.symbolIndex.removeFile(uri)))
+  }
+
   async shutdown() {
-    return this.symbolIndex.remove()
+    return this.symbolIndex.destroy()
   }
 }

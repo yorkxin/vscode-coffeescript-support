@@ -13,6 +13,8 @@ const DOC_SELECTORS = [
   { language: 'coffeescript' }
 ]
 
+const GLOB_COFFEE_SCRIPT_FILES = "**/*.coffee";
+
 export function activate(context: ExtensionContext) {
 
   // The server is implemented in node
@@ -45,12 +47,27 @@ export function activate(context: ExtensionContext) {
   // client can be deactivated on extension deactivation
   context.subscriptions.push(disposable);
 
+
   client.onReady().then(() => {
-    workspace.findFiles("**/*.coffee")
+    workspace.findFiles(GLOB_COFFEE_SCRIPT_FILES)
       .then(fileDescriptors => {
         const files = fileDescriptors.map(file => file.path)
         console.log("Found ", files.length, " .coffee files")
         client.sendRequest('custom/indexFiles', { files })
       })
+
+    const fileWatcher = workspace.createFileSystemWatcher(GLOB_COFFEE_SCRIPT_FILES);
+
+    fileWatcher.onDidCreate((uri) => {
+      client.sendRequest('custom/indexFiles', { files: [ uri ] })
+    })
+
+    fileWatcher.onDidChange((uri) => {
+      client.sendRequest('custom/indexFiles', { files: [ uri ] })
+    })
+
+    fileWatcher.onDidDelete((uri) => {
+      client.sendRequest('custom/removeFiles', { files: [ uri ] })
+    })
   })
 }
