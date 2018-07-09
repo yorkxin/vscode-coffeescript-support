@@ -9,6 +9,7 @@ interface SymbolMetadata {
 }
 
 const OBJECT_LITERAL_CONTAINER_NAME = '[anonymous]';
+const EXPORTS_MATCHER = /^(module\.)?exports(\..+)?$/;
 
 export class Parser {
   validateSource(src: string): Diagnostic[]  {
@@ -50,14 +51,23 @@ export class Parser {
     try {
       const symbols = this.getSymbolsFromBlock(this._parse(src));
 
-      const symbolsWithoutContainer = symbols.filter(symbol => !symbol.containerName);
-      const moduleExports = symbolsWithoutContainer.filter(symbol => symbol.name.match(/^(module\.)?exports(\..+)?$/))
+      const moduleExports = symbols.filter(symbol => {
+        if (symbol.name.match(EXPORTS_MATCHER)) {
+          return true;
+        }
+
+        if (symbol.containerName && symbol.containerName.match(EXPORTS_MATCHER)) {
+          return true;
+        }
+
+        return false;
+      })
 
       if (moduleExports.length !== 0) {
         return moduleExports;
       } else {
         // No exports. Assume global variables (tranditional web app).
-        return symbolsWithoutContainer;
+        return symbols.filter(symbol => !symbol.containerName);
       }
     } catch (error) {
       console.error(error)

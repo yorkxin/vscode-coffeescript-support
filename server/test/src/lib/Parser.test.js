@@ -136,6 +136,7 @@ describe('Parser', () => {
         { name: "exports.abc", kind: SymbolKind.Variable, containerName: undefined, location: expect.anything() },
         { name: "exports.foo", kind: SymbolKind.Namespace, containerName: undefined, location: expect.anything() },
         { name: "exports.bar", kind: SymbolKind.Namespace, containerName: undefined, location: expect.anything() },
+        { name: "baz", kind: SymbolKind.Variable, containerName: 'exports.bar', location: expect.anything() },
       ])
     })
   })
