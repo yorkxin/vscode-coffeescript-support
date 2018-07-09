@@ -8,6 +8,8 @@ interface SymbolMetadata {
   kind: SymbolKind
 }
 
+const OBJECT_LITERAL_CONTAINER_NAME = '[anonymous]';
+
 export class Parser {
   validateSource(src: string): Diagnostic[]  {
     try {
@@ -38,7 +40,8 @@ export class Parser {
   getSymbolsFromSource(src: string): SymbolInformation[] {
     try {
       return this.getSymbolsFromBlock(this._parse(src))
-    } catch (_error) {
+    } catch (error) {
+      console.error(error)
       return []
     }
   }
@@ -56,7 +59,8 @@ export class Parser {
         // No exports. Assume global variables (tranditional web app).
         return symbolsWithoutContainer;
       }
-    } catch (_error) {
+    } catch (error) {
+      console.error(error)
       return []
     }
   }
@@ -116,6 +120,13 @@ export class Parser {
 
   getSymbolsFromObj(objNode: Nodes.Obj, container?: SymbolMetadata): SymbolInformation[] {
     let symbolInformation: SymbolInformation[] = []
+
+    if (!container) {
+      container = {
+        kind: SymbolKind.Namespace,
+        name: OBJECT_LITERAL_CONTAINER_NAME
+      }
+    }
 
     objNode.properties.forEach(property => {
       symbolInformation = symbolInformation.concat(this.getSymbolsFromAssign(property, container))
