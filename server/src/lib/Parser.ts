@@ -10,8 +10,15 @@ interface SymbolMetadata {
 
 const OBJECT_LITERAL_CONTAINER_NAME = '[anonymous]';
 const EXPORTS_MATCHER = /^(module\.)?exports(\..+)?$/;
+const DEFAULT_OPTIONS = { includeClosure: true };
 
 export class Parser {
+  includeClosure: boolean;
+
+  constructor({ includeClosure } = DEFAULT_OPTIONS) {
+    this.includeClosure = includeClosure;
+  }
+
   validateSource(src: string): Diagnostic[]  {
     try {
       this._parse(src)
@@ -99,6 +106,10 @@ export class Parser {
   }
 
   getSymbolsFromBlock(block: Nodes.Block, container?: SymbolMetadata): SymbolInformation[] {
+    if (!this.includeClosure && container) {
+      return [];
+    }
+
     let symbolInformation: SymbolInformation[] = []
 
     block.expressions.forEach(node => {
@@ -160,21 +171,23 @@ export class Parser {
 
       symbolInformation.push(SymbolInformation.create(symbolMetadata.name, symbolMetadata.kind, _createRange(assign.locationData), null, containerName));
 
+      let nextContainerName
+
+      if (container) {
+        nextContainerName = `${container.name}.${symbolMetadata.name}`;
+      } else {
+        nextContainerName = symbolMetadata.name
+      }
+
+      let nextContainer: SymbolMetadata = {
+        name: nextContainerName,
+        kind: symbolMetadata.kind
+      }
+
       if (rhs instanceof Nodes.Value && rhs.base instanceof Nodes.Obj) {
-        let nextContainerName
-
-        if (container) {
-          nextContainerName = `${container.name}.${symbolMetadata.name}`;
-        } else {
-          nextContainerName = symbolMetadata.name
-        }
-
-        let nextContainer: SymbolMetadata = {
-          name: nextContainerName,
-          kind: symbolMetadata.kind
-        }
-
         symbolInformation = symbolInformation.concat(this.getSymbolsFromObj(rhs.base, nextContainer));
+      } else if (rhs instanceof Nodes.Code) {
+        symbolInformation = symbolInformation.concat(this.getSymbolsFromBlock(rhs.body, nextContainer));
       }
     }
 
