@@ -9,7 +9,7 @@ interface SymbolMetadata {
 }
 
 const OBJECT_LITERAL_CONTAINER_NAME = '[anonymous]';
-const EXPORTS_MATCHER = /^(module\.)?exports(\..+)?( =.+)?$/;
+const EXPORTS_MATCHER = /^(module\.)?exports(\..+)?( = (.+))?$/;
 const DEFAULT_OPTIONS = { includeClosure: true };
 
 export class Parser {
@@ -75,8 +75,25 @@ export class Parser {
         return symbols.filter(symbol => !symbol.containerName);
       }
 
-      // TODO: Expand more module.exports thorugh assignments
-      return moduleExports;
+      // Expand more module.exports thorugh assignments
+      const expandedSymbols: SymbolInformation[] = [];
+
+      moduleExports.filter(exported => exported.name.includes(' = '))
+        .forEach(exported => {
+          const identifier = exported.name.split(" = ")[1];
+
+          symbols.forEach(symbol => {
+            if (symbol.name === identifier) {
+              expandedSymbols.push(symbol);
+            }
+          })
+        })
+
+      return moduleExports.concat(expandedSymbols)
+        .sort((a, b) => a.location.range.start.line > b.location.range.start.line ? 1 : 0)
+        .sort((a, b) => a.location.range.start.character > b.location.range.start.character ? 1 : 0)
+        ;
+
     } catch (error) {
       console.error(error)
       return []
