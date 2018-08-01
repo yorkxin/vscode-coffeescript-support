@@ -106,7 +106,7 @@ export class Parser {
   }
 
   getSymbolsFromBlock(block: Nodes.Block, container?: SymbolMetadata): SymbolInformation[] {
-    if (!this.includeClosure && container) {
+    if (!this.includeClosure && container && container.kind !== SymbolKind.Class) {
       return [];
     }
 
