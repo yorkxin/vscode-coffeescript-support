@@ -38,7 +38,7 @@ describe('IndexService', () => {
       ];
 
       await service.indexFilesInBackground(files)
-      await expect(service.find("bar")).resolves.toHaveLength(2)
+      await expect(service.find("bar")).resolves.toHaveLength(4)
     });
   });
 

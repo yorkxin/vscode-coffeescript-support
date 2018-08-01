@@ -103,7 +103,7 @@ describe('SymbolIndex()', () => {
     }
 
     const expectedResult1 = {
-      name: 'module.exports.Bar',
+      name: 'module.exports.Bar = Bar',
       kind: SymbolKind.Variable,
       location: {
         range: expect.anything(),
