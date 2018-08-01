@@ -81,17 +81,20 @@ export class Parser {
       moduleExports.filter(exported => exported.name.includes(' = '))
         .forEach(exported => {
           const identifier = exported.name.split(" = ")[1];
+          const identifierPrefix = `${identifier}.`;
 
           symbols.forEach(symbol => {
             if (symbol.name === identifier) {
+              expandedSymbols.push(symbol);
+            } else if (symbol.containerName && (symbol.containerName === identifier || symbol.containerName.startsWith(identifierPrefix))) {
               expandedSymbols.push(symbol);
             }
           })
         })
 
       return moduleExports.concat(expandedSymbols)
-        .sort((a, b) => a.location.range.start.line > b.location.range.start.line ? 1 : 0)
-        .sort((a, b) => a.location.range.start.character > b.location.range.start.character ? 1 : 0)
+        .sort((a, b) => a.location.range.start.character - b.location.range.start.character)
+        .sort((a, b) => a.location.range.start.line - b.location.range.start.line)
         ;
 
     } catch (error) {
