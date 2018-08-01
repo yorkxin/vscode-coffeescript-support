@@ -34,13 +34,13 @@ describe('Parser', () => {
         { name: 'Foo', kind: SymbolKind.Class, location: expect.anything() },
         { name: 'Bar', kind: SymbolKind.Variable, location: expect.anything() },
         { name: 'Baz', kind: SymbolKind.Variable, location: expect.anything() },
-        { name: 'module.exports.Foo', kind: SymbolKind.Variable, location: expect.anything() },
-        { name: 'module.exports.Bar', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Foo = Foo', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Bar = Bar', kind: SymbolKind.Variable, location: expect.anything() },
       ])
 
       expect(parser.getExportedSymbolsFromSource(src)).toEqual([
-        { name: 'module.exports.Foo', kind: SymbolKind.Variable, location: expect.anything() },
-        { name: 'module.exports.Bar', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Foo = Foo', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Bar = Bar', kind: SymbolKind.Variable, location: expect.anything() },
       ])
     })
 
@@ -51,12 +51,12 @@ describe('Parser', () => {
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: 'Foo', kind: SymbolKind.Variable, location: expect.anything() },
         // FIXME: module.exports should be Class
-        { name: 'module.exports', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports = Bar', kind: SymbolKind.Variable, location: expect.anything() },
       ])
 
       expect(parser.getExportedSymbolsFromSource(src)).toEqual([
         // FIXME: module.exports should be Class
-        { name: 'module.exports', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports = Bar', kind: SymbolKind.Variable, location: expect.anything() },
       ])
     })
 
@@ -69,14 +69,14 @@ describe('Parser', () => {
         { name: "Bar", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "Baz()", kind: SymbolKind.Function, location: expect.anything() },
         { name: "x", kind: SymbolKind.Variable, containerName: "Baz()", location: expect.anything() },
-        { name: "Hogehoge", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "Hogehoge = Bar", kind: SymbolKind.Variable, location: expect.anything() },
       ])
 
       expect(parser.getExportedSymbolsFromSource(src)).toEqual([
         { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "Bar", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "Baz()", kind: SymbolKind.Function, location: expect.anything() },
-        { name: "Hogehoge", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "Hogehoge = Bar", kind: SymbolKind.Variable, location: expect.anything() },
       ])
     })
 
@@ -106,13 +106,13 @@ describe('Parser', () => {
         { name: 'Foo', kind: SymbolKind.Class, location: expect.anything() },
         { name: 'Bar', kind: SymbolKind.Variable, location: expect.anything() },
         { name: 'Baz', kind: SymbolKind.Variable, location: expect.anything() },
-        { name: 'module.exports.Foo', kind: SymbolKind.Variable, location: expect.anything() },
-        { name: 'module.exports.Bar', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Foo = Foo', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Bar = Bar', kind: SymbolKind.Variable, location: expect.anything() },
       ])
 
       expect(parser.getExportedSymbolsFromSource(src)).toEqual([
-        { name: 'module.exports.Foo', kind: SymbolKind.Variable, location: expect.anything() },
-        { name: 'module.exports.Bar', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Foo = Foo', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports.Bar = Bar', kind: SymbolKind.Variable, location: expect.anything() },
       ])
     })
 
@@ -121,12 +121,12 @@ describe('Parser', () => {
       const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-2.coffee')).toString();
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
-        { name: "module.exports", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "module.exports = Bar", kind: SymbolKind.Variable, location: expect.anything() },
       ]);
 
       expect(parser.getExportedSymbolsFromSource(src)).toEqual([
         // FIXME: module.exports should be Class
-        { name: 'module.exports', kind: SymbolKind.Variable, location: expect.anything() },
+        { name: 'module.exports = Bar', kind: SymbolKind.Variable, location: expect.anything() },
       ])
     })
 
@@ -138,14 +138,14 @@ describe('Parser', () => {
         { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "Bar", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "Baz()", kind: SymbolKind.Function, location: expect.anything() },
-        { name: "Hogehoge", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "Hogehoge = Bar", kind: SymbolKind.Variable, location: expect.anything() },
       ]);
 
       expect(parser.getExportedSymbolsFromSource(src)).toEqual([
         { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "Bar", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "Baz()", kind: SymbolKind.Function, location: expect.anything() },
-        { name: "Hogehoge", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "Hogehoge = Bar", kind: SymbolKind.Variable, location: expect.anything() },
       ])
     })
 
@@ -209,19 +209,19 @@ describe('Parser', () => {
         { name: "Apuri::sayhi()", kind: SymbolKind.Function, location: expect.anything()},
         { name: "@::foo()", kind: SymbolKind.Function, location: expect.anything()},
         { name: "Afuri", kind: SymbolKind.Class, location: expect.anything()},
-        { name: "human", kind: SymbolKind.Variable, location: expect.anything()},
-        { name: "module.exports", kind: SymbolKind.Variable, location: expect.anything()},
+        { name: "human = (Anonymous Class)", kind: SymbolKind.Variable, location: expect.anything()},
+        { name: "module.exports = App", kind: SymbolKind.Variable, location: expect.anything()},
         { name: "module.exports.KONSTANT", kind: SymbolKind.Variable, location: expect.anything()},
-        { name: "exports.abc", kind: SymbolKind.Variable, location: expect.anything()},
+        { name: "exports.abc = def", kind: SymbolKind.Variable, location: expect.anything()},
         { name: "exports.foo", kind: SymbolKind.Namespace, location: expect.anything()},
         { name: "exports.bar", kind: SymbolKind.Namespace, location: expect.anything()},
         { name: "baz", kind: SymbolKind.Variable, containerName: "exports.bar", location: expect.anything()}
       ]);
 
       expect(parser.getExportedSymbolsFromSource(src)).toEqual([
-        { name: "module.exports", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "module.exports = App", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "module.exports.KONSTANT", kind: SymbolKind.Variable, location: expect.anything() },
-        { name: "exports.abc", kind: SymbolKind.Variable, location: expect.anything() },
+        { name: "exports.abc = def", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "exports.foo", kind: SymbolKind.Namespace, location: expect.anything() },
         { name: "exports.bar", kind: SymbolKind.Namespace, location: expect.anything() },
         { name: "baz", kind: SymbolKind.Variable, containerName: 'exports.bar', location: expect.anything() },

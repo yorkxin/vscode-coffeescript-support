@@ -9,7 +9,7 @@ interface SymbolMetadata {
 }
 
 const OBJECT_LITERAL_CONTAINER_NAME = '[anonymous]';
-const EXPORTS_MATCHER = /^(module\.)?exports(\..+)?$/;
+const EXPORTS_MATCHER = /^(module\.)?exports(\..+)?( =.+)?$/;
 const DEFAULT_OPTIONS = { includeClosure: true };
 
 export class Parser {
@@ -70,12 +70,13 @@ export class Parser {
         return false;
       })
 
-      if (moduleExports.length !== 0) {
-        return moduleExports;
-      } else {
+      if (moduleExports.length === 0) {
         // No exports. Assume global variables (tranditional web app).
         return symbols.filter(symbol => !symbol.containerName);
       }
+
+      // TODO: Expand more module.exports thorugh assignments
+      return moduleExports;
     } catch (error) {
       console.error(error)
       return []
@@ -88,13 +89,7 @@ export class Parser {
 
   getSymbolsFromClass(classNode: Nodes.Class): SymbolInformation[] {
     let symbolInformation: SymbolInformation[] = []
-    let className: string
-
-    if (classNode.variable instanceof Nodes.Value && classNode.variable.base instanceof Nodes.Literal) {
-      className = classNode.variable.base.value
-    } else {
-      className = "(Anonymous Class)"
-    }
+    let className = formatClassIdentifier(classNode);
 
     symbolInformation.push(SymbolInformation.create(className, SymbolKind.Class, _createRange(classNode.locationData), null))
 
@@ -211,13 +206,13 @@ function _formatParam(param: Nodes.Param): string {
 
   // constructor(@foo)
   if (param.name instanceof Nodes.Value) {
-    return formatAssignee(param.name)
+    return formatAssignee(param.name, null)
   }
 
   return "???"
 }
 
-function formatAssignee(variable: Nodes.Value): string {
+function formatAssignee(variable: Nodes.Value, value?: Nodes.Value | Nodes.Class): string {
   let literals: Nodes.Literal[] = []
 
   if (variable.base instanceof Nodes.Literal) {
@@ -254,11 +249,26 @@ function formatAssignee(variable: Nodes.Value): string {
     }
   })
 
+  if (value instanceof Nodes.Value && value.base instanceof Nodes.IdentifierLiteral) {
+    tokens.push(" = ");
+    tokens.push(value.base.value);
+  } else if (value instanceof Nodes.Class) {
+    tokens.push(" = ");
+    tokens.push(formatClassIdentifier(value));
+  }
+
   return tokens.join('')
 }
 
-function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nodes.Code | Nodes.Call, container?: SymbolMetadata): SymbolMetadata {
-  let name = formatAssignee(lhs)
+function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nodes.Code | Nodes.Call | Nodes.Class, container?: SymbolMetadata): SymbolMetadata {
+  let name;
+
+  if (rhs instanceof Nodes.Value || rhs instanceof Nodes.Class) {
+    name = formatAssignee(lhs, rhs);
+  } else {
+    name = formatAssignee(lhs, null);
+  }
+
   let kind: SymbolKind
 
   if (rhs instanceof Nodes.Code) {
@@ -288,3 +298,10 @@ function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nod
   return { name, kind }
 }
 
+function formatClassIdentifier(classNode: Nodes.Class) {
+  if (classNode.variable instanceof Nodes.Value && classNode.variable.base instanceof Nodes.Literal) {
+    return classNode.variable.base.value
+  } else {
+    return "(Anonymous Class)"
+  }
+}
