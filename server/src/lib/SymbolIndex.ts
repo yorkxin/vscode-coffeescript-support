@@ -17,7 +17,7 @@ export class SymbolIndex {
 
   constructor(dbFilename: string) {
     this.dbFilename = dbFilename
-    this.parser = new Parser()
+    this.parser = new Parser({ includeClosure: false })
     this.db = new Datastore({ filename: this.dbFilename, autoload: true });
   }
 
