@@ -14,7 +14,6 @@ To install, visit: https://marketplace.visualstudio.com/items?itemName=yorkxin.c
 ### Planned
 
 - Show completion proposals
-- Show all All Symbol Definitions in Workspace ("Go to symbol in workspace" command)
 - Show definition of a symbol
 - Help with function signatures
 

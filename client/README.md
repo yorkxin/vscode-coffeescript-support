@@ -6,6 +6,7 @@ Helps you programming in CoffeeScript.
 
 - Syntax check while typing
 - Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
+- Show all All Symbol Definitions in Workspace ("Go to symbol in workspace" command)
 
 For other planned features, issues and source code, see https://github.com/chitsaou/vscode-coffeescript-support .
 

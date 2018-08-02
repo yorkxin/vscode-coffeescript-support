@@ -1,3 +1,9 @@
+# 0.2.0
+
+Features:
+
+- Show all All Symbol Definitions in Workspace ("Go to symbol in workspace" command)
+
 # 0.1.4
 
 Fixes:
