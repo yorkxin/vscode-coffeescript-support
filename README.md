@@ -10,6 +10,7 @@ To install, visit: https://marketplace.visualstudio.com/items?itemName=yorkxin.c
 
 - :ballot_box_with_check: Syntax check while typing
 - :ballot_box_with_check: Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
+- :ballot_box_with_check: Show all All Symbol Definitions in Workspace ("Go to symbol in workspace" command)
 
 ### Planned
 
