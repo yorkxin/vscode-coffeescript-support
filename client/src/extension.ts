@@ -34,6 +34,8 @@ export function activate(context: ExtensionContext) {
     synchronize: {
       // Synchronize the setting section 'coffeeScriptSupport' to the server
       configurationSection: 'coffeeScriptSupport',
+      // TODO: how to ignore FS events from files excluded by search.excludes and file.excludes?
+      // (https://github.com/Microsoft/vscode/issues/48674)
       fileEvents: workspace.createFileSystemWatcher(GLOB_COFFEE_SCRIPT_FILES)
     }
   }
@@ -47,6 +49,8 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(disposable);
 
   client.onReady().then(() => {
+    // TODO: exclude files that are excluded by search.excludes and file.excludes.
+    // (https://github.com/Microsoft/vscode/issues/48674)
     workspace.findFiles(GLOB_COFFEE_SCRIPT_FILES)
       .then(fileDescriptors => {
         const files = fileDescriptors.map(file => file.path)
