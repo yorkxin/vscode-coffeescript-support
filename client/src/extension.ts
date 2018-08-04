@@ -53,4 +53,8 @@ export function activate(context: ExtensionContext) {
         client.sendRequest('custom/addFiles', { files })
       })
   })
+
+  // TODO: Are these necessary? Do they trigger onDidChangeWatchedFiles()?
+  // TODO: When workspace folder is added, add files in it.
+  // TODO: When workspace folder is removed, remove files from it.
 }

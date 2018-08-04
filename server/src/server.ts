@@ -78,6 +78,8 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 */
 
 connection.onDocumentSymbol(params => {
+  // NOTE: this event get called on every character you entered / removed.
+  // TODO: somehow cache me to reduce CPU usage? Otherwise editing big file may be very slow.
   const doc = documents.get(params.textDocument.uri);
 
   if (doc) {
