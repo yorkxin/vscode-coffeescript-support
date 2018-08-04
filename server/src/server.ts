@@ -14,7 +14,6 @@ import {
 } from 'vscode-languageserver';
 
 import { Parser } from "./lib/Parser"
-import { readFileByURI } from "./utils/fileReader"
 import { IndexService } from './lib/IndexService';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
