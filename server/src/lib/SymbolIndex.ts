@@ -77,14 +77,23 @@ export class SymbolIndex {
 
     if (Uri.isUri(uriOrPath)) {
       uri = uriOrPath;
-    } else if (typeof uriOrPath === 'string') {
-      uri = Uri.parse(`file://${uriOrPath}`);
-    } else if (typeof uriOrPath.path === 'string') {
-      uri = Uri.parse(`file://${uriOrPath.path}`);
-    } else if (typeof uriOrPath.fsPath === 'string') {
-      uri = Uri.parse(uriOrPath.fsPath);
     } else {
-      throw new TypeError(`Cannot normalize anything other than Uri or string: ${JSON.stringify(uriOrPath)} (constructor: ${uriOrPath.constructor})`)
+      let stringToUse = null;
+      if (typeof uriOrPath === 'string') {
+        stringToUse = uriOrPath;
+      } else if (typeof uriOrPath.path === 'string') {
+        stringToUse = uriOrPath.path;
+      } else if (typeof uriOrPath.fsPath === 'string') {
+        stringToUse = uriOrPath.fsPath
+      } else {
+        throw new TypeError(`Cannot normalize anything other than Uri or string: ${JSON.stringify(uriOrPath)} (constructor: ${uriOrPath.constructor})`)
+      }
+
+      if (!stringToUse.startsWith('file://')) {
+        stringToUse = 'file://' + stringToUse;
+      }
+
+      uri = Uri.parse(stringToUse);
     }
 
     let locationURI = uri.toString(true /* do not URIencode */);

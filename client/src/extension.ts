@@ -35,7 +35,8 @@ export function activate(context: ExtensionContext) {
     documentSelector: DOC_SELECTORS,
     synchronize: {
       // Synchronize the setting section 'coffeeScriptSupport' to the server
-      configurationSection: 'coffeeScriptSupport'
+      configurationSection: 'coffeeScriptSupport',
+      fileEvents: workspace.createFileSystemWatcher(GLOB_COFFEE_SCRIPT_FILES)
     }
   }
 
@@ -47,27 +48,11 @@ export function activate(context: ExtensionContext) {
   // client can be deactivated on extension deactivation
   context.subscriptions.push(disposable);
 
-
   client.onReady().then(() => {
     workspace.findFiles(GLOB_COFFEE_SCRIPT_FILES)
       .then(fileDescriptors => {
         const files = fileDescriptors.map(file => file.path)
-        console.log("Found ", files.length, " .coffee files")
-        client.sendRequest('custom/indexFiles', { files })
+        client.sendRequest('custom/addFiles', { files })
       })
-
-    const fileWatcher = workspace.createFileSystemWatcher(GLOB_COFFEE_SCRIPT_FILES);
-
-    fileWatcher.onDidCreate((uri) => {
-      client.sendRequest('custom/indexFiles', { files: [ uri ] })
-    })
-
-    fileWatcher.onDidChange((uri) => {
-      client.sendRequest('custom/indexFiles', { files: [ uri ] })
-    })
-
-    fileWatcher.onDidDelete((uri) => {
-      client.sendRequest('custom/removeFiles', { files: [ uri ] })
-    })
   })
 }

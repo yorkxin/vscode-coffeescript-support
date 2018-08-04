@@ -4,14 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-const USE_BACKGROUND = true;
-
 import * as tmp from 'tmp';
 
 import {
   IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
   InitializeResult,
-  SymbolInformation
+  SymbolInformation,
+  FileChangeType
 } from 'vscode-languageserver';
 
 import { Parser } from "./lib/Parser"
@@ -49,31 +48,10 @@ connection.onInitialize((_): InitializeResult => {
   }
 });
 
-connection.onRequest('custom/indexFiles', (params) => {
-  console.log('custom/indexFiles')
-  const uris = params.files
-
-  console.log("indexFiles:", uris.length, 'files')
-  console.time("indexFiles")
-
-  let indexing
-
-  // TODO: make this an extension config
-  if (USE_BACKGROUND) {
-    indexing = indexService.indexFilesInBackground(uris)
-  } else {
-    indexing = indexService.indexFilesInForeground(uris)
-  }
-
-  return indexing.then(() => {
-    console.timeEnd("indexFiles")
-  })
-})
-
-connection.onRequest('custom/removeFiles', (params) => {
-  console.log('custom/removeFiles')
-  return indexService.removeFiles(params.files)
-})
+connection.onRequest('custom/addFiles', params => {
+  console.info('Will index', params.files.length, 'files');
+  indexService.indexFilesInBackground(params.files);
+});
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
@@ -81,6 +59,16 @@ documents.onDidChangeContent(change => {
   const diagnostics = documentParser.validateSource(change.document.getText())
   connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
 });
+
+connection.onDidChangeWatchedFiles(params => {
+  params.changes.forEach(change => {
+    if (change.type === FileChangeType.Deleted) {
+      indexService.removeFiles([change.uri]);
+    } else if (change.type === FileChangeType.Changed || change.type === FileChangeType.Created) {
+      indexService.indexFilesInBackground([change.uri])
+    }
+  })
+})
 
 /*
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
