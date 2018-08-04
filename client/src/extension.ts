@@ -9,10 +9,6 @@ import * as path from 'path';
 import { ExtensionContext, workspace } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient';
 
-const DOC_SELECTORS = [
-  { language: 'coffeescript', scheme: 'file' }
-]
-
 const GLOB_COFFEE_SCRIPT_FILES = "**/*.coffee";
 
 export function activate(context: ExtensionContext) {
@@ -32,7 +28,9 @@ export function activate(context: ExtensionContext) {
   // Options to control the language client
   let clientOptions: LanguageClientOptions = {
     // Register the server for CoffeeScript documents
-    documentSelector: DOC_SELECTORS,
+    documentSelector: [
+      { language: 'coffeescript' }
+    ],
     synchronize: {
       // Synchronize the setting section 'coffeeScriptSupport' to the server
       configurationSection: 'coffeeScriptSupport',

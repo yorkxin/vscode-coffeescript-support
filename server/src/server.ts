@@ -79,11 +79,11 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 */
 
 connection.onDocumentSymbol(params => {
-  if (/file:\/\//.test(params.textDocument.uri)) {
-    const src = readFileByURI(params.textDocument.uri)
-    return documentParser.getSymbolsFromSource(src)
+  const doc = documents.get(params.textDocument.uri);
+
+  if (doc) {
+    return documentParser.getSymbolsFromSource(doc.getText());
   } else {
-    // TODO: find a way to get content of Untitled tab
     return []
   }
 })
