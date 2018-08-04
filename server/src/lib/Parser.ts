@@ -12,6 +12,9 @@ const OBJECT_LITERAL_CONTAINER_NAME = '[anonymous]';
 const EXPORTS_MATCHER = /^(module\.)?exports(\..+)?( = (.+))?$/;
 const DEFAULT_OPTIONS = { includeClosure: true };
 
+// TODO: LSP 4.4.0 supports hierarchical DocumentSymbol.
+// Reafctor this class so that it does not bind to any interface in `vscode-languageserver`,
+// then we can re-shape the results to whatever we want.
 export class Parser {
   includeClosure: boolean;
 
