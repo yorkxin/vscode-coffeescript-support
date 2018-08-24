@@ -27,21 +27,26 @@ export class IndexService {
   async indexFilesInBackground(uris: string[]): Promise<any> {
     console.log(new Date(), 'index with sub processes')
 
-    let args: string[] = []
+    let modulePath: string = null;
+    let args = ["-d", this.dbFilename];
 
     if (fs.existsSync(INDEXER_CLI_JS_PATH)) {
-      args = [INDEXER_CLI_JS_PATH, "-d", this.dbFilename];
+      console.log(new Date(), 'will spawn js indexer')
+      modulePath = INDEXER_CLI_JS_PATH;
     } else if (fs.existsSync(INDEXER_CLI_TS_PATH)) {
-      args = ["-r", "ts-node/register", INDEXER_CLI_TS_PATH, "-d", this.dbFilename];
+      // FIXME: this is a workaround for unit tests (Node.js only), but after we changed to fork, it does not work anymore.
+      console.warn(new Date(), 'using ts-node to spawn process')
+      modulePath = INDEXER_CLI_TS_PATH;
+      args.unshift("-r", "ts-node/register");
     } else {
       throw new Error('Indexer does not exist.')
     }
 
-    const proc = cp.spawn('node', args, {
-      stdio: ['inherit', 'inherit', 'inherit', 'ipc']
-    });
-
     const promise = new Promise((resolve, reject) => {
+      const proc = cp.fork(modulePath, args, {
+        stdio: ['inherit', 'inherit', 'inherit', 'ipc']
+      });
+
       proc.on('message', (params) => {
         if (params.done) {
           console.info(new Date(), 'Indexer done')
@@ -69,9 +74,9 @@ export class IndexService {
         console.error(new Date(), err.stack);
         reject(err);
       });
-    })
 
-    proc.send({ files: uris })
+      proc.send({ files: uris });
+    });
 
     return promise;
   }
