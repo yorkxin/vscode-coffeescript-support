@@ -1,8 +1,10 @@
-const path = require('path');
-const fs = require('fs');
-const tmp = require('tmp');
+import * as path from 'path';
+import * as fs from 'fs';
+import * as tmp from 'tmp';
 
-const { IndexService } = require('../../../src/lib/IndexService');
+import { IndexService } from '../../../src/lib/IndexService';
+
+const TEST_FIXTURES_ROOT = path.resolve(__dirname, '../../../../test-fixtures');
 
 describe('IndexService', () => {
   function initService () {
@@ -11,11 +13,7 @@ describe('IndexService', () => {
     return new IndexService(tempura.name);
   }
 
-  /**
-   *
-   * @param {IndexService} indexService
-   */
-  function shutdownService (indexService) {
+  function shutdownService (indexService: IndexService) {
     indexService.shutdown()
   }
 
@@ -29,12 +27,11 @@ describe('IndexService', () => {
 
   describe('#indexFilesInBackground()', () => {
     test('works', async () => {
-      /** @type {IndexService} */
-      const service = this.indexService;
+      const service: IndexService = this.indexService;
 
       const files = [
-        path.resolve(__dirname, '../../fixtures/globals.coffee'),
-        path.resolve(__dirname, '../../fixtures/sample.coffee')
+        path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee'),
+        path.resolve(TEST_FIXTURES_ROOT, 'sample.coffee')
       ];
 
       await service.indexFilesInBackground(files)
@@ -44,28 +41,25 @@ describe('IndexService', () => {
 
   describe('#find()', () => {
     beforeEach(async () => {
-      /** @type {IndexService} */
-      const service = this.indexService;
+      const service: IndexService = this.indexService;
 
       const files = [
-        path.resolve(__dirname, '../../fixtures/globals.coffee'),
-        path.resolve(__dirname, '../../fixtures/sample.coffee')
+        path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee'),
+        path.resolve(TEST_FIXTURES_ROOT, 'sample.coffee')
       ];
 
       await service.indexFilesInBackground(files)
     })
 
     test('calls symbolIndex#find', async () => {
-      /** @type {IndexService} */
-      const service = this.indexService
+      const service: IndexService = this.indexService
       service.symbolIndex.find = jest.fn()
       await service.find("bar")
       expect(service.symbolIndex.find).toHaveBeenCalledWith('bar')
     });
 
     test('does not even calls symbolIndex#find when no input string', async () => {
-      /** @type {IndexService} */
-      const service = this.indexService
+      const service: IndexService = this.indexService
       service.symbolIndex.find = jest.fn()
       await service.find("")
       expect(service.symbolIndex.find).not.toHaveBeenCalled()
