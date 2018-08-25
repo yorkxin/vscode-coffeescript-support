@@ -3,7 +3,7 @@ import * as Nodes from 'coffeescript/lib/coffeescript/nodes'
 
 import { SymbolInformation, SymbolKind, Range, Diagnostic, DiagnosticSeverity } from "vscode-languageserver"
 
-interface SymbolMetadata {
+export interface SymbolMetadata {
   name: string,
   kind: SymbolKind
 }
@@ -114,7 +114,7 @@ export class Parser {
     let symbolInformation: SymbolInformation[] = []
     let className = formatClassIdentifier(classNode);
 
-    symbolInformation.push(SymbolInformation.create(className, SymbolKind.Class, _createRange(classNode.locationData), null))
+    symbolInformation.push(SymbolInformation.create(className, SymbolKind.Class, _createRange(classNode.locationData), undefined))
 
     if (classNode.body instanceof Nodes.Block) {
       symbolInformation = symbolInformation.concat(this.getSymbolsFromBlock(classNode.body, { name: className, kind: SymbolKind.Class }))
@@ -182,12 +182,13 @@ export class Parser {
     if (lhs instanceof Nodes.Value && lhs.base instanceof Nodes.Literal) {
       let symbolMetadata = _getSymbolMetadataByAssignment(lhs, rhs, container)
 
-      let containerName: string = null
+      let containerName: string | undefined;
+
       if (container) {
         containerName = container.name
       }
 
-      symbolInformation.push(SymbolInformation.create(symbolMetadata.name, symbolMetadata.kind, _createRange(assign.locationData), null, containerName));
+      symbolInformation.push(SymbolInformation.create(symbolMetadata.name, symbolMetadata.kind, _createRange(assign.locationData), undefined, containerName));
 
       let nextContainerName
 
@@ -229,7 +230,7 @@ function _formatParam(param: Nodes.Param): string {
 
   // constructor(@foo)
   if (param.name instanceof Nodes.Value) {
-    return formatAssignee(param.name, null)
+    return formatAssignee(param.name, undefined)
   }
 
   return "???"
@@ -289,7 +290,7 @@ function _getSymbolMetadataByAssignment(lhs: Nodes.Value, rhs: Nodes.Value | Nod
   if (rhs instanceof Nodes.Value || rhs instanceof Nodes.Class) {
     name = formatAssignee(lhs, rhs);
   } else {
-    name = formatAssignee(lhs, null);
+    name = formatAssignee(lhs, undefined);
   }
 
   let kind: SymbolKind

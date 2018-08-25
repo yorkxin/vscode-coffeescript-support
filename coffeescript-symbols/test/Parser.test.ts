@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const { Parser } = require('../../../src/lib/Parser');
+const { Parser } = require('../src/Parser');
 const { DiagnosticSeverity, SymbolKind } = require("vscode-languageserver/lib/main");
+const TEST_FIXTURES_ROOT = path.resolve(__dirname, '../../test-fixtures');
 
 describe('Parser', () => {
   describe('validateSource()', () => {
@@ -28,7 +29,7 @@ describe('Parser', () => {
   describe('Parser in "includeClosure = true" mode', () => {
     test('works for named export', () => {
       const parser = new Parser({ includeClosure: true })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-1.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'export-1.coffee')).toString();
 
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: 'Foo', kind: SymbolKind.Class, location: expect.anything() },
@@ -48,7 +49,7 @@ describe('Parser', () => {
 
     test('works for default export', () => {
       const parser = new Parser({ includeClosure: true })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-2.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'export-2.coffee')).toString();
 
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: 'Foo', kind: SymbolKind.Variable, location: expect.anything() },
@@ -64,7 +65,7 @@ describe('Parser', () => {
 
     test('works for global variables', () => {
       const parser = new Parser({ includeClosure: true })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/globals.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee')).toString();
 
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
@@ -84,7 +85,7 @@ describe('Parser', () => {
 
     test('works for top level function call', () => {
       const parser = new Parser({ includeClosure: true })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/top-level-function-call.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'top-level-function-call.coffee')).toString();
 
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: "value", kind: SymbolKind.Namespace, containerName: '[anonymous]', location: expect.anything() },
@@ -102,7 +103,7 @@ describe('Parser', () => {
   describe('Parser in "includeClosure = false" mode', () => {
     test('works for named export', () => {
       const parser = new Parser({ includeClosure: false })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-1.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'export-1.coffee')).toString();
 
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: 'Foo', kind: SymbolKind.Class, location: expect.anything() },
@@ -122,7 +123,7 @@ describe('Parser', () => {
 
     test('works for default export', () => {
       const parser = new Parser({ includeClosure: false })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/export-2.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'export-2.coffee')).toString();
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
         { name: "module.exports = Bar", kind: SymbolKind.Variable, location: expect.anything() },
@@ -136,7 +137,7 @@ describe('Parser', () => {
 
     test('works for global variables', () => {
       const parser = new Parser({ includeClosure: false })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/globals.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee')).toString();
 
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: "Foo", kind: SymbolKind.Variable, location: expect.anything() },
@@ -155,7 +156,7 @@ describe('Parser', () => {
 
     test('works for top level function call', () => {
       const parser = new Parser({ includeClosure: false })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/top-level-function-call.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'top-level-function-call.coffee')).toString();
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: "value", kind: SymbolKind.Namespace, containerName: '[anonymous]', location: expect.anything() },
         { name: "type", kind: SymbolKind.Variable, containerName: '[anonymous].value', location: expect.anything() },
@@ -170,7 +171,7 @@ describe('Parser', () => {
 
     test('works for a complex sample file', () => {
       const parser = new Parser({ includeClosure: false })
-      const src = fs.readFileSync(path.resolve(__dirname, '../../fixtures/sample.coffee')).toString();
+      const src = fs.readFileSync(path.resolve(TEST_FIXTURES_ROOT, 'sample.coffee')).toString();
 
       expect(parser.getSymbolsFromSource(src)).toEqual([
         { name: "A", kind: SymbolKind.Package, location: expect.anything()},
