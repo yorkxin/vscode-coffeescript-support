@@ -13,7 +13,7 @@ import {
   FileChangeType
 } from 'vscode-languageserver';
 
-import { Parser } from "./lib/Parser"
+import { Parser } from "coffeescript-symbols";
 import { IndexService } from './lib/IndexService';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport

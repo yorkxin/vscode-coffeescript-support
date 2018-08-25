@@ -1,10 +1,9 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as cp from "child_process";
-import { SymbolIndex } from "./SymbolIndex";
+import { SymbolIndex } from "coffeescript-symbol-index";
 
-const INDEXER_CLI_TS_PATH = path.resolve(__dirname, "..", "bin", "indexer.ts");
-const INDEXER_CLI_JS_PATH = path.resolve(__dirname, "..", "bin", "indexer.js");
+const INDEXER_CLI_PATH = path.resolve(__dirname, "../../node_modules/coffeescript-symbol-index/dist/bin/coffeescript-symbol-indexer.js");
 
 export class IndexService {
   symbolIndex: SymbolIndex
@@ -27,23 +26,14 @@ export class IndexService {
   async indexFilesInBackground(uris: string[]): Promise<any> {
     console.log(new Date(), 'index with sub processes')
 
-    let modulePath: string = null;
     let args = ["-d", this.dbFilename];
 
-    if (fs.existsSync(INDEXER_CLI_JS_PATH)) {
-      console.log(new Date(), 'will spawn js indexer')
-      modulePath = INDEXER_CLI_JS_PATH;
-    } else if (fs.existsSync(INDEXER_CLI_TS_PATH)) {
-      // FIXME: this is a workaround for unit tests (Node.js only), but after we changed to fork, it does not work anymore.
-      console.warn(new Date(), 'using ts-node to spawn process')
-      modulePath = INDEXER_CLI_TS_PATH;
-      args.unshift("-r", "ts-node/register");
-    } else {
-      throw new Error('Indexer does not exist.')
+    if (!fs.existsSync(INDEXER_CLI_PATH)) {
+      throw new Error(`Indexer does not exist: ${INDEXER_CLI_PATH}`)
     }
 
     const promise = new Promise((resolve, reject) => {
-      const proc = cp.fork(modulePath, args, {
+      const proc = cp.fork(INDEXER_CLI_PATH, args, {
         stdio: ['inherit', 'inherit', 'inherit', 'ipc']
       });
 
