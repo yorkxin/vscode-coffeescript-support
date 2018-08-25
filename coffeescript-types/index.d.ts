@@ -1,3 +1,8 @@
+declare module "coffeescript" {
+  import { Block } from "coffeescript/lib/coffeescript/nodes"
+  export function nodes(source: string, options?: any): Block;
+}
+
 // http://coffeescript.org/annotated-source/nodes.html
 declare module "coffeescript/lib/coffeescript/nodes" {
   import { Scope } from "coffeescript/lib/coffeescript/scope"
@@ -417,5 +422,13 @@ declare module "coffeescript/lib/coffeescript/nodes" {
     first_column: number,
     last_line: number,
     last_column: number
+  }
+}
+
+declare module "coffeescript/lib/coffeescript/scope" {
+  export class Scope {
+    variables: { name: string, type: string}[]
+    positions: any
+    utilities?: any
   }
 }

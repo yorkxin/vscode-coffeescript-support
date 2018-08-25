@@ -1,3 +1,4 @@
+/// <reference types="coffeescript-types" />
 import * as Nodes from 'coffeescript/lib/coffeescript/nodes';
 import { SymbolInformation, SymbolKind, Diagnostic } from "vscode-languageserver";
 export interface SymbolMetadata {
