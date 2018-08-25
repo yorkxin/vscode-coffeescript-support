@@ -1,7 +1,9 @@
-const fs = require('fs');
-const path = require('path');
-const { Parser } = require('../src/Parser');
-const { DiagnosticSeverity, SymbolKind } = require("vscode-languageserver/lib/main");
+import * as fs from 'fs';
+import * as path from 'path';
+import {} from 'ts-jest';
+import { Parser } from '../src/Parser';
+import { DiagnosticSeverity, SymbolKind } from "vscode-languageserver/lib/main";
+
 const TEST_FIXTURES_ROOT = path.resolve(__dirname, '../../test-fixtures');
 
 describe('Parser', () => {
