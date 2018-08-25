@@ -1,6 +1,10 @@
 import * as readline from 'readline';
 import * as program from "commander";
-import { SymbolIndex } from "../lib/SymbolIndex"
+import { SymbolIndex } from "../SymbolIndex"
+
+if (!(process.send instanceof Function)) {
+  throw new Error('Cannot run this bin in Worker');
+}
 
 program
   .option('-d, --db <db>', 'DB File name')
@@ -23,12 +27,18 @@ rl.on('line', (line) => {
   symbolIndex.indexFile(line)
 })
 
-process.on('message', (params) => {
+interface Message {
+  files: string[] | undefined;
+}
+
+process.on('message', async (params: Message) => {
   if (params.files) {
-    Promise.all(params.files.map((file:string) => {
+    await Promise.all(params.files.map((file:string) => {
       return symbolIndex.indexFile(file)
-    })).then(() => {
-      process.send({ done: true })
-    })
+    }));
+
+    if (process.send instanceof Function) {
+      process.send({ done: true });
+    }
   }
 })

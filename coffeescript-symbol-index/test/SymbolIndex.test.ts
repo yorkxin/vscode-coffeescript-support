@@ -1,10 +1,12 @@
-const path = require('path');
-const fs = require('fs');
-const tmp = require('tmp');
-const { SymbolKind } = require('vscode-languageserver');
-const Nedb = require('nedb')
+import * as path from 'path';
+import * as fs from 'fs';
+import * as tmp from 'tmp';
+import { SymbolKind } from 'vscode-languageserver';
+import Nedb from 'nedb'
 
-const { SymbolIndex } = require('../../../src/lib/SymbolIndex');
+import { SymbolIndex } from '../src/SymbolIndex';
+
+const TEST_FIXTURES_ROOT = path.resolve(__dirname, '../../test-fixtures');
 
 describe('SymbolIndex()', () => {
   function createIndex () {
@@ -13,18 +15,11 @@ describe('SymbolIndex()', () => {
     return new SymbolIndex(tempura.name);
   }
 
-  /**
-   * @param {SymbolIndex} index
-   */
-  function cleanupIndex (index) {
+  function cleanupIndex (index: SymbolIndex) {
     fs.unlinkSync(index.dbFilename);
   }
 
-  /**
-   * @param {Nedb} db
-   * @param {any} query
-   */
-  async function countPromise(db, query) {
+  async function countPromise(db: Nedb, query: any) {
     return new Promise((resolve, reject) => {
       db.count(query, (err, num) => {
         if (err) { reject(err) };
@@ -45,15 +40,15 @@ describe('SymbolIndex()', () => {
     test('works', async () => {
       const index = this.index;
       await expect(Promise.all([
-        index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee')),
-        index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee'))
+        index.indexFile(path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee')),
+        index.indexFile(path.resolve(TEST_FIXTURES_ROOT, 'sample.coffee'))
       ]))
     });
 
     test('does not duplicate if index same file twice', async () => {
       /** @type {SymbolIndex} */
-      const index = this.index;
-      const file = path.resolve(__dirname, '../../fixtures/export-1.coffee');
+      const index: SymbolIndex = this.index;
+      const file = path.resolve(TEST_FIXTURES_ROOT, 'export-1.coffee');
       await index.indexFile(file);
       const origianlSize = await countPromise(index.db, { "symbolInformation.location.uri": /fixtures\/export-1\.coffee/ });
       expect(origianlSize).not.toBe(0);
@@ -66,9 +61,9 @@ describe('SymbolIndex()', () => {
   describe('#removeFile()', () => {
     test('does not duplicate if index same file twice', async () => {
       /** @type {SymbolIndex} */
-      const index = this.index;
-      const file1 = path.resolve(__dirname, '../../fixtures/export-1.coffee');
-      const file2 = path.resolve(__dirname, '../../fixtures/export-2.coffee');
+      const index: SymbolIndex = this.index;
+      const file1 = path.resolve(TEST_FIXTURES_ROOT, 'export-1.coffee');
+      const file2 = path.resolve(TEST_FIXTURES_ROOT, 'export-2.coffee');
 
       await index.indexFile(file1);
       await index.indexFile(file2);
@@ -90,14 +85,11 @@ describe('SymbolIndex()', () => {
   });
 
   describe('#find()', () => {
-    /**
-     * @param {SymbolIndex} index
-     */
-    async function prepareIndex(index) {
-      await index.indexFile(path.resolve(__dirname, '../../fixtures/globals.coffee'));
-      await index.indexFile(path.resolve(__dirname, '../../fixtures/sample.coffee'));
-      await index.indexFile(path.resolve(__dirname, '../../fixtures/export-1.coffee'));
-      await index.indexFile(path.resolve(__dirname, '../../fixtures/export-2.coffee'));
+    async function prepareIndex(index: SymbolIndex) {
+      await index.indexFile(path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee'));
+      await index.indexFile(path.resolve(TEST_FIXTURES_ROOT, 'sample.coffee'));
+      await index.indexFile(path.resolve(TEST_FIXTURES_ROOT, 'export-1.coffee'));
+      await index.indexFile(path.resolve(TEST_FIXTURES_ROOT, 'export-2.coffee'));
 
       return index
     }
@@ -107,7 +99,7 @@ describe('SymbolIndex()', () => {
       kind: SymbolKind.Variable,
       location: {
         range: expect.anything(),
-        uri: "file://" + path.resolve(__dirname, '../../fixtures/export-1.coffee'),
+        uri: "file://" + path.resolve(TEST_FIXTURES_ROOT, 'export-1.coffee'),
       },
     };
 
@@ -116,7 +108,7 @@ describe('SymbolIndex()', () => {
       kind: SymbolKind.Namespace,
       location: {
         range: expect.anything(),
-        uri: "file://" + path.resolve(__dirname, '../../fixtures/sample.coffee'),
+        uri: "file://" + path.resolve(TEST_FIXTURES_ROOT, 'sample.coffee'),
       },
     };
 
@@ -125,7 +117,7 @@ describe('SymbolIndex()', () => {
       kind: SymbolKind.Variable,
       location: {
         range: expect.anything(),
-        uri: "file://" + path.resolve(__dirname, '../../fixtures/globals.coffee'),
+        uri: "file://" + path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee'),
       },
     };
 

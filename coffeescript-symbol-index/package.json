@@ -1,0 +1,29 @@
+{
+  "name": "coffeescript-symbol-index",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": "dist/bin/coffeescript-symbol-indexer.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "coffeescript-symbols": "file:../coffeescript-symbols",
+    "commander": "^2.15.1",
+    "nedb": "^1.8.0",
+    "typescript": "^2.7.2",
+    "vscode-languageserver": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^23.3.1",
+    "@types/nedb": "^1.8.5",
+    "@types/tmp": "0.0.33",
+    "jest": "^23.5.0",
+    "tmp": "0.0.33",
+    "ts-jest": "^23.1.4"
+  }
+}

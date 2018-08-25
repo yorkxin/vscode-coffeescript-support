@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import * as Datastore from "nedb";
-import { Parser } from "./Parser"
+import { Parser } from "coffeescript-symbols"
 import { SymbolInformation } from "vscode-languageserver";
 import Uri from 'vscode-uri'
 
-interface SymbolInformationEntry {
+export interface SymbolInformationEntry {
   searchableName: string;
   locationDescriptor: string;
   symbolInformation: SymbolInformation;
@@ -55,9 +55,10 @@ export class SymbolIndex {
       this.db.loadDatabase(() => {
         // TODO: should we sort?
         this.db.find(dbQuery)
-          .exec((err: Error, docs: SymbolInformationEntry[]) => {
+          .exec((err: Error, docs) => {
             if (err) { reject(err) }
-            resolve(docs.map(entry => entry.symbolInformation))
+            const entries = docs as SymbolInformationEntry[];
+            resolve(entries.map(entry => entry.symbolInformation))
           })
       })
     })
