@@ -10,18 +10,18 @@ import {
   IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
   InitializeResult,
   SymbolInformation,
-  FileChangeType
+  FileChangeType,
 } from 'vscode-languageserver';
 
-import { Parser } from "coffeescript-lsp-core";
+import { Parser } from 'coffeescript-lsp-core';
 import { IndexService } from './lib/IndexService';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
-let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
+const connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
-let documents: TextDocuments = new TextDocuments();
+const documents: TextDocuments = new TextDocuments();
 // Make the text document manager listen on the connection
 // for open, change and close text document events
 documents.listen(connection);
@@ -30,44 +30,44 @@ documents.listen(connection);
 // in the passed params the rootPath of the workspace plus the client capabilites.
 let indexService: IndexService;
 let documentParser: Parser;
-let dbFilename: string
+let dbFilename: string;
 
 connection.onInitialize((_): InitializeResult => {
-  dbFilename = tmp.tmpNameSync({ prefix: "coffee-symbols-", postfix: '.json' })
-  indexService = new IndexService(dbFilename)
-  documentParser = new Parser()
+  dbFilename = tmp.tmpNameSync({ prefix: 'coffee-symbols-', postfix: '.json' });
+  indexService = new IndexService(dbFilename);
+  documentParser = new Parser();
 
   return {
     capabilities: {
       // Tell the client that the server works in FULL text document sync mode
       textDocumentSync: documents.syncKind,
       documentSymbolProvider: true,
-      workspaceSymbolProvider: true
-    }
-  }
+      workspaceSymbolProvider: true,
+    },
+  };
 });
 
-connection.onRequest('custom/addFiles', params => {
+connection.onRequest('custom/addFiles', (params) => {
   console.info('Will index', params.files.length, 'files');
   indexService.indexFilesInBackground(params.files);
 });
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
-  const diagnostics = documentParser.validateSource(change.document.getText())
+documents.onDidChangeContent((change) => {
+  const diagnostics = documentParser.validateSource(change.document.getText());
   connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
 });
 
-connection.onDidChangeWatchedFiles(params => {
-  params.changes.forEach(change => {
+connection.onDidChangeWatchedFiles((params) => {
+  params.changes.forEach((change) => {
     if (change.type === FileChangeType.Deleted) {
       indexService.removeFiles([change.uri]);
     } else if (change.type === FileChangeType.Changed || change.type === FileChangeType.Created) {
-      indexService.indexFilesInBackground([change.uri])
+      indexService.indexFilesInBackground([change.uri]);
     }
-  })
-})
+  });
+});
 
 /*
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
@@ -77,7 +77,7 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 });
 */
 
-connection.onDocumentSymbol(params => {
+connection.onDocumentSymbol((params) => {
   // NOTE: this event get called on every character you entered / removed.
   // TODO: somehow cache me to reduce CPU usage? Otherwise editing big file may be very slow.
   const doc = documents.get(params.textDocument.uri);
@@ -85,13 +85,13 @@ connection.onDocumentSymbol(params => {
   if (doc) {
     return documentParser.getSymbolsFromSource(doc.getText());
   } else {
-    return []
+    return [];
   }
-})
+});
 
 connection.onWorkspaceSymbol(async (params): Promise<SymbolInformation[]> => {
-  return indexService.find(params.query)
-})
+  return indexService.find(params.query);
+});
 
 /*
 connection.onDidOpenTextDocument((params) => {
@@ -115,4 +115,3 @@ connection.onDidCloseTextDocument((params) => {
 
 // Listen on the connection
 connection.listen();
-
