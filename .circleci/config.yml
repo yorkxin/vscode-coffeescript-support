@@ -24,5 +24,7 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run: cd server && npm test
+      # TODO: test client
       # - run: cd client && npm test
+      - run: npm run compile
 
