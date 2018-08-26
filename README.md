@@ -36,6 +36,11 @@ Note: features are described on [Visual Studio Code Language Extension Guideline
 * Open `demo/app.coffee`
 * Use commands, for example, "Go to symbol in file..." command.
 
+## Related Libraries
+
+* [coffeescript-lsp-core](https://github.com/chitsaou/coffeescript-lsp-core) - Core library for CoffeeScript Language Server Protocol
+* [coffeescript-types](https://github.com/chitsaou/coffeescript-types) - CoffeeScript parser type declarations in TypeScript
+
 ## Release
 
 For maintainer only.
