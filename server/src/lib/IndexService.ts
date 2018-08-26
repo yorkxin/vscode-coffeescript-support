@@ -1,9 +1,9 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as cp from "child_process";
-import { SymbolIndex } from "coffeescript-symbol-index";
+import { SymbolIndex } from "coffeescript-lsp-core";
 
-const INDEXER_CLI_PATH = path.resolve(__dirname, "../../node_modules/coffeescript-symbol-index/dist/bin/coffeescript-symbol-indexer.js");
+const INDEXER_CLI_PATH = path.resolve(__dirname, "../../node_modules/coffeescript-lsp-core/dist/bin/coffeescript-symbol-indexer.js");
 
 export class IndexService {
   symbolIndex: SymbolIndex

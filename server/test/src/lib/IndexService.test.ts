@@ -4,7 +4,7 @@ import * as tmp from 'tmp';
 
 import { IndexService } from '../../../src/lib/IndexService';
 
-const TEST_FIXTURES_ROOT = path.resolve(__dirname, '../../../../test-fixtures');
+const TEST_FIXTURES_ROOT = path.resolve(__dirname, '../../fixtures');
 
 describe('IndexService', () => {
   function initService () {

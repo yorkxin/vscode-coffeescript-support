@@ -1,9 +1,0 @@
-{
-  "name": "coffeescript-types",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "author": "",
-  "license": "ISC"
-}

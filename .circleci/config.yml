@@ -25,8 +25,5 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run: cd server && npm test
-      - run: cd coffeescript-symbol-index && npm test
-      - run: cd coffeescript-symbols && npm test
-      - run: cd coffeescript-types && npm test
       # - run: cd client && npm test
 

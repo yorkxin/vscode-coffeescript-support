@@ -12,8 +12,7 @@
     "url": "https://github.com/chitsaou/vscode-coffeescript-support"
   },
   "dependencies": {
-    "coffeescript-symbols": "file:../coffeescript-symbols",
-    "coffeescript-symbol-index": "file:../coffeescript-symbol-index",
+    "coffeescript-lsp-core": "https://github.com/chitsaou/coffeescript-lsp-core.git",
     "tmp": "0.0.33",
     "vscode-languageserver": "^5.0.0"
   },
