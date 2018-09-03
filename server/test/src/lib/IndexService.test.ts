@@ -13,53 +13,36 @@ describe('IndexService', () => {
     return new IndexService(tempura.name);
   }
 
-  function shutdownService(indexService: IndexService) {
-    indexService.shutdown();
-  }
-
-  beforeEach(() => {
-    this.indexService = initService();
-  });
-
-  afterEach(() => {
-    shutdownService(this.indexService);
-  });
-
   describe('#indexFilesInBackground()', () => {
     test('works', async () => {
-      const service: IndexService = this.indexService;
-
       const files = [
         path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee'),
         path.resolve(TEST_FIXTURES_ROOT, 'sample.coffee'),
       ];
 
-      await service.indexFilesInBackground(files);
-      await expect(service.find('bar')).resolves.toHaveLength(4);
+      const service: IndexService = initService();
+
+      const result = await (async () => {
+        await service.indexFilesInBackground(files);
+        return await service.find('bar');
+      })();
+
+      await service.shutdown();
+
+      expect(result).toHaveLength(4);
     });
   });
 
   describe('#find()', () => {
-    beforeEach(async () => {
-      const service: IndexService = this.indexService;
-
-      const files = [
-        path.resolve(TEST_FIXTURES_ROOT, 'globals.coffee'),
-        path.resolve(TEST_FIXTURES_ROOT, 'sample.coffee'),
-      ];
-
-      await service.indexFilesInBackground(files);
-    });
-
     test('calls symbolIndex#find', async () => {
-      const service: IndexService = this.indexService;
+      const service: IndexService = initService();
       service.symbolIndex.find = jest.fn();
       await service.find('bar');
       expect(service.symbolIndex.find).toHaveBeenCalledWith('bar');
     });
 
     test('does not even calls symbolIndex#find when no input string', async () => {
-      const service: IndexService = this.indexService;
+      const service: IndexService = initService();
       service.symbolIndex.find = jest.fn();
       await service.find('');
       expect(service.symbolIndex.find).not.toHaveBeenCalled();

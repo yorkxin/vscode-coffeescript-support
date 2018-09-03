@@ -26,7 +26,16 @@ export class IndexService {
 
   public async indexFilesInBackground(uris: string[]): Promise<any> {
     console.log(new Date(), 'index with sub processes');
-    this.indexer.send({ files: uris });
+
+    return new Promise((resolve, reject) => {
+      this.indexer.once('message', (params) => {
+        if (params.done) {
+          resolve();
+        }
+      });
+
+      this.indexer.send({ files: uris });
+    });
   }
 
   public async indexFilesInForeground(uris: string[]): Promise<any> {
@@ -61,8 +70,8 @@ export class IndexService {
     });
 
     this.indexerProcess.on('exit', (code) => {
-      if (code !== 0) {
-        throw Error('Indexer exited with non-zero code');
+      if (!(code === 0 || code === null)) {
+        throw Error(`Indexer exited with non-zero code: ${code}`);
       }
 
       console.info(new Date(), 'Indexer exited');
