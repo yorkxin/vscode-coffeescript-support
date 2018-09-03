@@ -8,6 +8,7 @@ const INDEXER_CLI_PATH = path.resolve(__dirname, '../../node_modules/coffeescrip
 export class IndexService {
   public symbolIndex: SymbolIndex;
   public dbFilename: string;
+  private indexerProcess: cp.ChildProcess;
 
   constructor(dbFilename: string) {
     this.dbFilename = dbFilename;
@@ -25,50 +26,7 @@ export class IndexService {
 
   public async indexFilesInBackground(uris: string[]): Promise<any> {
     console.log(new Date(), 'index with sub processes');
-
-    const args = ['-d', this.dbFilename];
-
-    if (!fs.existsSync(INDEXER_CLI_PATH)) {
-      throw new Error(`Indexer does not exist: ${INDEXER_CLI_PATH}`);
-    }
-
-    const promise = new Promise((resolve, reject) => {
-      const proc = cp.fork(INDEXER_CLI_PATH, args, {
-        stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-      });
-
-      proc.on('message', (params) => {
-        if (params.done) {
-          console.info(new Date(), 'Indexer done');
-          proc.kill();
-          resolve();
-        } else {
-          throw new TypeError(`Unknown message from child: ${params}`);
-        }
-      });
-
-      proc.on('exit', (code) => {
-        if (code !== 0) { reject('Indexer exited with non-zero code'); }
-        console.info(new Date(), 'Indexer exited');
-        resolve();
-      });
-
-      proc.on('uncaughtException', (err) => {
-        console.error(new Date(), 'Indexer Failed');
-        console.error(new Date(), err.stack);
-        reject(err);
-      });
-
-      proc.on('error', (err) => {
-        console.error(new Date(), 'Indexer Failed');
-        console.error(new Date(), err.stack);
-        reject(err);
-      });
-
-      proc.send({ files: uris });
-    });
-
-    return promise;
+    this.indexer.send({ files: uris });
   }
 
   public async indexFilesInForeground(uris: string[]): Promise<any> {
@@ -82,5 +40,70 @@ export class IndexService {
 
   public async shutdown() {
     return this.symbolIndex.destroy();
+  }
+
+  private get indexer(): cp.ChildProcess {
+    if (this.indexerProcess) {
+      return this.indexerProcess;
+    }
+
+    console.info('Starting indexer process...');
+    this.indexerProcess = this.startIndexer(INDEXER_CLI_PATH, this.dbFilename);
+
+    this.indexerProcess.on('message', (params) => {
+      if (params.done) {
+        console.info(new Date(), 'Indexer done');
+      } else {
+        this.stopIndexer();
+        throw new TypeError(`Unknown message from child: ${params}`);
+      }
+    });
+
+    this.indexerProcess.on('exit', (code) => {
+      if (code !== 0) {
+        throw Error('Indexer exited with non-zero code');
+      }
+
+      console.info(new Date(), 'Indexer exited');
+      this.stopIndexer();
+    });
+
+    this.indexerProcess.on('uncaughtException', (err) => {
+      console.error(new Date(), 'Indexer Failed');
+      console.error(new Date(), err.stack);
+      this.stopIndexer();
+    });
+
+    this.indexerProcess.on('error', (err) => {
+      console.error(new Date(), 'Indexer Error');
+      console.error(new Date(), err.stack);
+      this.stopIndexer();
+    });
+
+    return this.indexerProcess;
+  }
+
+  private startIndexer(cliPath: string, dbFilename: string): cp.ChildProcess {
+    const args = ['-d', dbFilename];
+
+    if (!fs.existsSync(cliPath)) {
+      throw new Error(`Indexer bin does not exist: ${cliPath}`);
+    }
+
+    const proc = cp.fork(cliPath, args, {
+      stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+    });
+
+    return proc;
+  }
+
+  private stopIndexer() {
+    if (!this.indexerProcess) {
+      console.warn('Trying to stop indexer process but it is not running');
+      return;
+    }
+
+    this.indexerProcess.kill();
+    this.indexerProcess = null;
   }
 }
