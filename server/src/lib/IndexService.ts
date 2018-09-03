@@ -39,6 +39,7 @@ export class IndexService {
   }
 
   public async shutdown() {
+    this.stopIndexer();
     return this.symbolIndex.destroy();
   }
 
