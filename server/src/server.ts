@@ -60,13 +60,21 @@ documents.onDidChangeContent((change) => {
 });
 
 connection.onDidChangeWatchedFiles((params) => {
+  const deletedFiles: string[] = [];
+  const changedFiles: string[] = [];
+
   params.changes.forEach((change) => {
     if (change.type === FileChangeType.Deleted) {
-      indexService.removeFiles([change.uri]);
+      deletedFiles.push(change.uri);
     } else if (change.type === FileChangeType.Changed || change.type === FileChangeType.Created) {
-      indexService.indexFilesInBackground([change.uri]);
+      changedFiles.push(change.uri);
     }
   });
+
+  console.info(`- Deleted: ${deletedFiles.length}`);
+  console.info(`+ Changed: ${changedFiles.length}`);
+  indexService.removeFiles(deletedFiles);
+  indexService.indexFilesInBackground(changedFiles);
 });
 
 /*
