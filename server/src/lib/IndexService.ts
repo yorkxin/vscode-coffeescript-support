@@ -27,7 +27,7 @@ export class IndexService {
   public async indexFilesInBackground(uris: string[]): Promise<any> {
     console.log(new Date(), 'index with sub processes');
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.indexer.once('message', (params) => {
         if (params.done) {
           resolve();
