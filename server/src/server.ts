@@ -4,44 +4,77 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
+import * as tmp from 'tmp';
+
 import {
   IPCMessageReader, IPCMessageWriter, createConnection, IConnection, TextDocuments,
-  InitializeResult
+  InitializeResult,
+  SymbolInformation,
+  FileChangeType,
 } from 'vscode-languageserver';
 
-import { documentSymbol } from "./features/documentSymbol"
-import { validateTextDocument } from "./features/validateTextDocument"
-import { readFileByURI } from "./utils/fileReader"
+import { Parser } from 'coffeescript-lsp-core';
+import { IndexService } from './lib/IndexService';
 
 // Create a connection for the server. The connection uses Node's IPC as a transport
-let connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
+const connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
-let documents: TextDocuments = new TextDocuments();
+const documents: TextDocuments = new TextDocuments();
 // Make the text document manager listen on the connection
 // for open, change and close text document events
 documents.listen(connection);
 
 // After the server has started the client sends an initilize request. The server receives
 // in the passed params the rootPath of the workspace plus the client capabilites.
-// let workspaceRoot: string;
+let indexService: IndexService;
+let documentParser: Parser;
+let dbFilename: string;
+
 connection.onInitialize((_): InitializeResult => {
-  // workspaceRoot = params.rootPath;
+  dbFilename = tmp.tmpNameSync({ prefix: 'coffee-symbols-', postfix: '.json' });
+  indexService = new IndexService(dbFilename);
+  documentParser = new Parser();
+
   return {
     capabilities: {
       // Tell the client that the server works in FULL text document sync mode
       textDocumentSync: documents.syncKind,
-      documentSymbolProvider: true
-    }
-  }
+      documentSymbolProvider: true,
+      workspaceSymbolProvider: true,
+    },
+  };
+});
+
+connection.onRequest('custom/addFiles', (params) => {
+  console.info('Will index', params.files.length, 'files');
+  indexService.indexFilesInBackground(params.files);
 });
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
-  const diagnostics = validateTextDocument(change.document.getText())
+documents.onDidChangeContent((change) => {
+  const diagnostics = documentParser.validateSource(change.document.getText());
   connection.sendDiagnostics({ uri: change.document.uri, diagnostics });
+});
+
+connection.onDidChangeWatchedFiles((params) => {
+  const deletedFiles: string[] = [];
+  const changedFiles: string[] = [];
+
+  params.changes.forEach((change) => {
+    if (change.type === FileChangeType.Deleted) {
+      deletedFiles.push(change.uri);
+    } else if (change.type === FileChangeType.Changed || change.type === FileChangeType.Created) {
+      changedFiles.push(change.uri);
+    }
+  });
+
+  console.info(`- Deleted: ${deletedFiles.length}`);
+  console.info(`+ Changed: ${changedFiles.length}`);
+  indexService.removeFiles(deletedFiles);
+  indexService.indexFilesInBackground(changedFiles);
 });
 
 /*
@@ -52,15 +85,21 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
 });
 */
 
-connection.onDocumentSymbol(params => {
-  if (/file:\/\//.test(params.textDocument.uri)) {
-    const src = readFileByURI(params.textDocument.uri)
-    return documentSymbol(src)
+connection.onDocumentSymbol((params) => {
+  // NOTE: this event get called on every character you entered / removed.
+  // TODO: somehow cache me to reduce CPU usage? Otherwise editing big file may be very slow.
+  const doc = documents.get(params.textDocument.uri);
+
+  if (doc) {
+    return documentParser.getSymbolsFromSource(doc.getText());
   } else {
-    // TODO: find a way to get content of Untitled tab
-    return []
+    return [];
   }
-})
+});
+
+connection.onWorkspaceSymbol(async (params): Promise<SymbolInformation[]> => {
+  return indexService.find(params.query);
+});
 
 /*
 connection.onDidOpenTextDocument((params) => {
@@ -84,4 +123,3 @@ connection.onDidCloseTextDocument((params) => {
 
 // Listen on the connection
 connection.listen();
-

@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "checkJs": true,
+    "allowJs": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitAny": true,
@@ -12,6 +14,10 @@
     "outDir": "../client/server",
     "typeRoots": [
       "./@types"
+    ],
+    "types": [
+      "node",
+      "jest"
     ]
   },
   "exclude": [

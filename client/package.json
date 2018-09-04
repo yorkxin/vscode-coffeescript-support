@@ -3,21 +3,22 @@
   "description": "Advanced CoffeeScript Support for VSCode",
   "author": "Yucheng Chuang",
   "license": "MIT",
-  "version": "0.1.4",
+  "version": "0.2.0-beta.8",
   "publisher": "yorkxin",
   "repository": {
     "type": "git",
     "url": "https://github.com/chitsaou/vscode-coffeescript-support"
   },
   "engines": {
-    "vscode": "^1.16.0"
+    "vscode": "^1.26.0"
   },
   "categories": [
-    "Languages"
+    "Programming Languages"
   ],
   "icon": "assets/icon.png",
   "activationEvents": [
-    "onLanguage:coffeescript"
+    "onLanguage:coffeescript",
+    "workspaceContains:**/*.coffee"
   ],
   "main": "./out/src/extension",
   "contributes": {},
@@ -29,7 +30,7 @@
     "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "dependencies": {
-    "vscode": "^1.1.18",
-    "vscode-languageclient": "^3.4.2"
+    "vscode": "^1.1.21",
+    "vscode-languageclient": "^5.0.0"
   }
 }

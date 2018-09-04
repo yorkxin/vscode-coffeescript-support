@@ -15,11 +15,12 @@
     "compile:client": "tsc -p client/tsconfig.json",
     "watch:client": "tsc -w -p client/tsconfig.json",
     "compile:server": "cd server && npm run installServer && cd .. && tsc -p server/tsconfig.json",
-    "watch:server": "cd server && npm run installServer && cd .. && tsc -w -p server/tsconfig.json"
+    "watch:server": "cd server && npm run installServer && cd .. && tsc -w -p server/tsconfig.json",
+    "lint": "tslint '**/src/**/*.ts' '**/test/**/*.ts'"
   },
   "devDependencies": {
-    "@types/mocha": "^2.2.42",
-    "@types/node": "^6.0.88",
-    "typescript": "^2.5.2"
+    "@types/node": "^8.10.28",
+    "tslint": "^5.11.0",
+    "typescript": "^2.7.2"
   }
 }
