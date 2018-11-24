@@ -59,3 +59,7 @@ vsce publish # -> push to VSCode Marketplace
 ## License
 
 MIT License. See [License.txt](./License.txt)
+
+## Special Thanks
+
+Special thanks to my empolyer [Moneytree.jp](https://moneytree.jp/) for allowing me working on this project during Hack Days. Check [Moneytree's Career Page](https://moneytree.jp/careers/) for open positions in Tokyo, Japan (English speakers welcomed.)
