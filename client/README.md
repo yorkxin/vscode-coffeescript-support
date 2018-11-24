@@ -16,4 +16,10 @@ For other planned features, issues and source code, see https://github.com/chits
 
 ## Demo
 
-![](https://github.com/chitsaou/vscode-coffeescript-support/raw/master/client/assets/demo.gif)
+### Go to Symbol in File
+
+![](https://github.com/chitsaou/vscode-coffeescript-support/raw/master/client/assets/file-symbols.gif)
+
+### Go to Symbol in Workspace
+
+![](https://github.com/chitsaou/vscode-coffeescript-support/raw/master/client/assets/workspace-symbols.gif)
