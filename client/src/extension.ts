@@ -29,7 +29,7 @@ export function activate(context: ExtensionContext) {
   const clientOptions: LanguageClientOptions = {
     // Register the server for CoffeeScript documents
     documentSelector: [
-      { language: 'coffeescript' },
+      { scheme: 'file', language: 'coffeescript' },
     ],
     synchronize: {
       // Synchronize the setting section 'coffeeScriptSupport' to the server
