@@ -1,6 +1,12 @@
 # Unreleased
 
-Security Update on test libraries and `vscode` package.
+Features:
+
+- Supports Dynamic Import syntax `import()`
+
+Others:
+
+- Security Update on test libraries and `vscode` package.
 
 # 0.2.0
 
