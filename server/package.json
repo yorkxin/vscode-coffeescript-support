@@ -12,7 +12,7 @@
     "url": "https://github.com/chitsaou/vscode-coffeescript-support"
   },
   "dependencies": {
-    "coffeescript-lsp-core": "chitsaou/coffeescript-lsp-core#v1.2.0",
+    "coffeescript-lsp-core": "chitsaou/coffeescript-lsp-core#v1.3.0",
     "tmp": "0.0.33",
     "vscode-languageserver": "^5.0.0"
   },
