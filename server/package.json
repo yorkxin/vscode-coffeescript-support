@@ -17,17 +17,14 @@
     "vscode-languageserver": "^5.0.0"
   },
   "scripts": {
-    "installServer": "installServerIntoExtension ../client ./package.json ./tsconfig.json",
-    "compile": "installServerIntoExtension ../client ./package.json ./tsconfig.json && tsc -p .",
-    "watch": "installServerIntoExtension ../client ./package.json ./tsconfig.json && tsc -w -p .",
     "test": "jest"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.11",
+    "@types/jest": "^24.0.13",
     "@types/tmp": "0.0.33",
-    "jest": "^24.7.1",
+    "jest": "^24.8.0",
     "ts-jest": "^24.0.2",
-    "ts-node": "^3.3.0",
-    "typescript": "^3.4.2"
+    "ts-node": "^8.1.0",
+    "typescript": "^3.4.5"
   }
 }
