@@ -8,7 +8,7 @@ const INDEXER_CLI_PATH = path.resolve(__dirname, '../../node_modules/coffeescrip
 export class IndexService {
   public symbolIndex: SymbolIndex;
   public dbFilename: string;
-  private indexerProcess: cp.ChildProcess;
+  private indexerProcess: (cp.ChildProcess|null) = null;
 
   constructor(dbFilename: string) {
     this.dbFilename = dbFilename;

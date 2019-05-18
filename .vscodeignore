@@ -1,0 +1,14 @@
+**/*.ts
+**/tsconfig*.json
+**/tslint.json
+
+.circleci/**
+.github/**
+.vscode/**
+typings/**
+**/test/**
+.gitignore
+tsconfig.json
+
+assets/*.pxm
+assets/*.mp4

@@ -14,7 +14,7 @@ const GLOB_COFFEE_SCRIPT_FILES = '**/*.coffee';
 export function activate(context: ExtensionContext) {
 
   // The server is implemented in node
-  const serverModule = context.asAbsolutePath(path.join('server', 'src', 'server.js'));
+  const serverModule = context.asAbsolutePath(path.join('server', 'out', 'server.js'));
   // The debug options for the server
   const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
 
