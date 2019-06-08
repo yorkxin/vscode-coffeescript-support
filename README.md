@@ -8,7 +8,7 @@ Helps you programming in CoffeeScript.
 - Show all Symbol Definitions Within a Document ("Go to symbol in file" command)
 - Show all All Symbol Definitions in Workspace ("Go to symbol in workspace" command)
 
-For other planned features, issues and source code, see https://github.com/chitsaou/vscode-coffeescript-support .
+To report bugs, or contribute to the source code, see https://github.com/chitsaou/vscode-coffeescript-support .
 
 ### Known Issues
 
@@ -18,11 +18,11 @@ For other planned features, issues and source code, see https://github.com/chits
 
 ### Go to Symbol in File
 
-![](https://github.com/chitsaou/vscode-coffeescript-support/raw/master/client/assets/file-symbols.gif)
+![](https://github.com/chitsaou/vscode-coffeescript-support/raw/master/assets/file-symbols.gif)
 
 ### Go to Symbol in Workspace
 
-![](https://github.com/chitsaou/vscode-coffeescript-support/raw/master/client/assets/workspace-symbols.gif)
+![](https://github.com/chitsaou/vscode-coffeescript-support/raw/master/assets/workspace-symbols.gif)
 
 ## Contributing
 
