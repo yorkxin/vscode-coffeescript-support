@@ -4,7 +4,7 @@ Helps you programming in CoffeeScript.
 
 ## 🙏 Looking For Maintainer 🙏
 
-The initial author doesn't work on CoffeeScript projects anymore. If you would like to take over the development of this extension, please contact Yucheng Chuang <ducksteven at gmail dot com>.
+The initial author doesn't work on CoffeeScript projects anymore. If you would like to take over the development of this extension, please contact Yucheng Chuang `<ducksteven at gmail dot com>`.
 
 ## Supported
 
