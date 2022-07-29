@@ -2,9 +2,9 @@
 
 Helps you programming in CoffeeScript.
 
-## 🙏 Looking For Maintainer 🙏
+## :wave: DEPRECATED DUE TO INACTIVE DEVELOPMENT :wave:
 
-The initial author doesn't work on CoffeeScript projects anymore. If you would like to take over the development of this extension, please contact Yucheng Chuang `<ducksteven at gmail dot com>`.
+Alternative: [CoffeeSense](https://marketplace.visualstudio.com/items?itemName=phil294.coffeesense) (source code: [phil294/coffeesense](https://github.com/phil294/coffeesense))
 
 ## Supported
 
@@ -22,16 +22,16 @@ To report bugs, or contribute to the source code, see https://github.com/yorkxin
 
 ### Go to Symbol in File
 
-![](https://github.com/yorkxin/vscode-coffeescript-support/raw/master/assets/file-symbols.gif)
+![](./assets/file-symbols.gif)
 
 ### Go to Symbol in Workspace
 
-![](https://github.com/yorkxin/vscode-coffeescript-support/raw/master/assets/workspace-symbols.gif)
+![](./assets/workspace-symbols.gif)
 
 ## Contributing
 
-See [CONTRIBUTING.md]
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 
-MIT License. SEE [./LICENSE] file.
+MIT License. SEE [LICENSE](./LICENSE) file.
